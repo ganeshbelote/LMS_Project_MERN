@@ -1,10 +1,22 @@
-import React from 'react'
+import { useEffect, useState } from 'react'
 import ProfBg from '../assets/profbg.jpg'
 import userProfile from '../assets/userprof.jpg'
 import Navbar from '../components/Navbar.jsx'
-import { NavLink, Outlet, useNavigate } from 'react-router-dom'
+import { NavLink, Outlet } from 'react-router-dom'
 
-const SideBar = ({ userData }) => {
+const SideBar = ({ role, userData }) => {
+  const [dashboardRoute, setDashboardRoute] = useState(null)
+
+  useEffect(() => {
+    const role = localStorage.getItem('role')
+
+    if (role == 'admin') {
+      setDashboardRoute('/Admin/dashboard')
+    } else {
+      setDashboardRoute('/Home/dashboard')
+    }
+  }, [])
+
   return (
     <div
       className='sidebar z-10 min-h-screen w-[80vw] hidden lg:w-[20vw] bg-gradient-to-b from-blue-500 to-violet-500 lg:flex flex-col items-center gap-6 fixed top-0 left-0 overflow-y-auto'
@@ -60,7 +72,7 @@ const SideBar = ({ userData }) => {
 
             {/* Navigation Links */}
             <NavLink
-              to='/Home/dashboard'
+              to={dashboardRoute}
               className={({ isActive }) =>
                 `w-[85%] px-4 py-2 rounded-lg text-center text-base font-semibold shadow-md transition-all duration-200 ${
                   isActive
@@ -72,18 +84,33 @@ const SideBar = ({ userData }) => {
               Dashboard
             </NavLink>
 
-            <NavLink
-              to='/Home/enrolled-courses'
-              className={({ isActive }) =>
-                `w-[85%] px-4 py-2 rounded-lg text-center text-base font-semibold shadow-md transition-all duration-200 ${
-                  isActive
-                    ? 'bg-white text-black border-2 border-black'
-                    : 'bg-zinc-100 text-black'
-                }`
-              }
-            >
-              Enrolled Courses
-            </NavLink>
+            {role == 'user' ? (
+              <NavLink
+                to='/Home/enrolled-courses'
+                className={({ isActive }) =>
+                  `w-[85%] px-4 py-2 rounded-lg text-center text-base font-semibold shadow-md transition-all duration-200 ${
+                    isActive
+                      ? 'bg-white text-black border-2 border-black'
+                      : 'bg-zinc-100 text-black'
+                  }`
+                }
+              >
+                Enrolled Courses
+              </NavLink>
+            ) : (
+              <NavLink
+                to='/Admin/add-courses'
+                className={({ isActive }) =>
+                  `w-[85%] px-4 py-2 rounded-lg text-center text-base font-semibold shadow-md transition-all duration-200 ${
+                    isActive
+                      ? 'bg-white text-black border-2 border-black'
+                      : 'bg-zinc-100 text-black'
+                  }`
+                }
+              >
+                Add Courses
+              </NavLink>
+            )}
           </div>
 
           {/* Main Content */}

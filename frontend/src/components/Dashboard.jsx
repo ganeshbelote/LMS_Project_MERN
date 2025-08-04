@@ -10,7 +10,6 @@ const Dashboard = () => {
   const [courseData, setCourseData] = useState([])
   const navigate = useNavigate()
   const role = localStorage.getItem('role')
-  const [track, setTrack] = useState(0)
 
   const fetchCourseData = async () => {
     try {
@@ -65,7 +64,7 @@ const Dashboard = () => {
   }
 
   return (
-    <div className='dashboard mt-[9vh] w-[100vw] lg:w-[80vw] absolute right-0 '>
+    <div className='dashboard md:mt-12 lg:mt-16 w-[100vw] lg:w-[80vw] lg:absolute right-0 overflow-x-hidden'>
       <div
         className='hero p-6 h-[60vh] w-full text-white flex flex-col items-center justify-center'
         style={{
@@ -108,9 +107,9 @@ const Dashboard = () => {
         </h2>
       </div>
       <div
-        className='courses w-full min-h-[100vh] flex justify-center flex-wrap gap-5'
+        id='courses'
+        className='courses p-6 w-full flex justify-center flex-wrap gap-5'
         style={{
-          padding: '10vh',
           backgroundImage: `url(${courseBg})`,
           backgroundPosition: 'center',
           backgroundSize: 'cover',
@@ -120,10 +119,7 @@ const Dashboard = () => {
         {filteredCourses.map((course, i) => (
           <div
             key={i}
-            className='course text-white h-[52vh] w-[18vw] bg-[#1c263c] rounded-lg shadow-lg shadow-black hover:scale-101 hover:transition-all flex flex-col items-center justify-between gap-2 relative'
-            style={{
-              padding: '2% 1%'
-            }}
+            className='course p-4 min-w-3xs text-white bg-[#1c263c] rounded-lg shadow-lg shadow-black hover:scale-101 hover:transition-all flex flex-col items-center justify-center gap-3 relative'
           >
             {role === 'admin' ? (
               <div
@@ -136,7 +132,7 @@ const Dashboard = () => {
               ''
             )}
             <div
-              className='thumbnail h-[50%] w-[80%] rounded-lg'
+              className='thumbnail h-36 w-full rounded-lg'
               style={{
                 backgroundImage: course.thumbnail
                   ? `url(http://localhost:8000/${course.thumbnail.replace(
@@ -159,7 +155,7 @@ const Dashboard = () => {
             </h2>
             <button
               className='bg-blue-600 text-white text-lg font-semibold font rounded-lg cursor-pointer hover:scale-105 '
-              style={{ padding: '8px 10px', marginTop: '9px' }}
+              style={{ padding: '8px 10px'}}
               onClick={() => navigate(`/${course._id}`)}
             >
               Checkout Now

@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { successMsg, failureMsg } from '../utils/message.js'
 import { useNavigate } from 'react-router-dom'
 
-const Form = ({ responsive }) => {
+const Form = () => {
   const navigate = useNavigate()
-  const [switchLogin,setSwitchLogin] = useState(false)
-  
+  const [switchLogin, setSwitchLogin] = useState(false)
+
   //Adding animations for Registration and Login of User
   const [animate, setAnimate] = useState(false)
   const handleAnimation = () => {
@@ -117,10 +117,10 @@ const Form = ({ responsive }) => {
     }
   }
 
-  if (responsive) {
-    return (
-      <div className='form shadow-xl shadow-black relative h-[70vh] w-[60vw] bg-amber-100 flex items-center justify-center gap-5 rounded-2xl overflow-hidden '>
-        <div className='register w-[45%] h-[90%] rounded-2xl flex flex-col items-center justify-around '>
+  return (
+    <>
+      <div className='form p-12 px-16 hidden shadow-xl shadow-black relative bg-amber-100 lg:flex items-center justify-center gap-24 rounded-2xl overflow-hidden '>
+        <div className='register rounded-2xl flex flex-col items-center justify-around gap-3.5'>
           <h2
             className='text-3xl font-bold'
             style={{
@@ -173,7 +173,7 @@ const Form = ({ responsive }) => {
             Register
           </button>
         </div>
-        <div className='login w-[45%] h-[90%] rounded-2xl flex flex-col items-center justify-around  '>
+        <div className='login rounded-2xl flex flex-col items-center justify-around gap-3.5'>
           <h2
             className='text-3xl font-bold'
             style={{
@@ -216,18 +216,15 @@ const Form = ({ responsive }) => {
           </button>
         </div>
         <div
-          className='absolute text-white h-full w-full rounded-[60px] flex items-center justify-center gap-5 bg-blue-600'
+          className='px-20 absolute text-white h-full w-full rounded-[60px] flex items-center justify-between bg-blue-600'
           style={{
             left: animate ? '-50%' : '50%',
             transition: 'all 0.5s ease-in-out'
           }}
         >
-          <div className='left w-[45%] h-[90%] rounded-2xl flex flex-col items-center justify-center '>
+          <div className='left rounded-2xl flex flex-col items-center justify-center '>
             <h2
-              className='text-3xl font-bold'
-              style={{
-                marginBottom: '25px'
-              }}
+              className='mb-6 text-3xl font-bold'
             >
               Welcome back !
             </h2>
@@ -245,12 +242,9 @@ const Form = ({ responsive }) => {
               Login
             </button>
           </div>
-          <div className='right w-[45%] h-[90%] rounded-2xl flex flex-col items-center justify-center '>
+          <div className='right rounded-2xl flex flex-col items-center justify-center '>
             <h2
-              className='text-3xl font-bold'
-              style={{
-                marginBottom: '25px'
-              }}
+              className='mb-6 text-3xl font-bold'
             >
               Hello, Friend !
             </h2>
@@ -270,77 +264,90 @@ const Form = ({ responsive }) => {
           </div>
         </div>
       </div>
-    )
-  }
-  return (
-    <div className='wrapper w-83 overflow-hidden'>
-      <div className='switch-auth-section overflow-hidden bg-amber-100 flex justify-evenly items-center rounded-t-2xl'>
-        <button onClick={() => setSwitchLogin(false)} className='w-1/2 h-full p-2.5 bg-blue-600 text-white text-lg font-semibold font cursor-pointer hover:scale-105' type='button'>Register</button>
-        <button onClick={() => setSwitchLogin(true)} className='w-1/2 h-full p-2.5 bg-blue-600 text-white text-lg font-semibold font cursor-pointer hover:scale-105' type='button'>Login</button>
-      </div>
-      <div className="slider flex" style={{
-        transform : switchLogin ? "translateX(-100%)" : "translateX(0%)"
-      }}>
-        <div className='register bg-amber-100 p-8 rounded-b-2xl flex gap-2.5 flex-col items-center justify-around '>
-        <h2 className='text-3xl font-bold mb-6'>Register</h2>
-        <input
-          className='rounded-lg py-2 px-5 text-lg font-semibold outline-0 border-0 bg-white focus:outline-2 outline-blue-600'
-          type='text'
-          placeholder='Username'
-          name='username'
-          onChange={handleRegisterChange}
-          value={registerData.username}
-        />
-        <input
-          className='rounded-lg py-2 px-5 text-lg font-semibold outline-0 border-0 bg-white focus:outline-2 outline-blue-600'
-          type='text'
-          placeholder='Email'
-          name='email'
-          onChange={handleRegisterChange}
-          value={registerData.email}
-        />
-        <input
-          className='rounded-lg py-2 px-5 text-lg font-semibold outline-0 border-0 bg-white focus:outline-2 outline-blue-600'
-          type='text'
-          placeholder='Password'
-          name='password'
-          onChange={handleRegisterChange}
-          value={registerData.password}
-        />
-        <button
-          className='mt-5.5 py-2 px-6 bg-blue-600 text-white text-lg font-semibold font rounded-lg cursor-pointer hover:scale-105'
-          onClick={handleRegister}
+      <div className='wrapper lg:hidden w-83 overflow-hidden'>
+        <div className='switch-auth-section overflow-hidden bg-amber-100 flex justify-evenly items-center rounded-t-2xl'>
+          <button
+            onClick={() => setSwitchLogin(false)}
+            className='w-1/2 h-full p-2.5 bg-blue-600 text-white text-lg font-semibold font cursor-pointer hover:scale-105'
+            type='button'
+          >
+            Register
+          </button>
+          <button
+            onClick={() => setSwitchLogin(true)}
+            className='w-1/2 h-full p-2.5 bg-blue-600 text-white text-lg font-semibold font cursor-pointer hover:scale-105'
+            type='button'
+          >
+            Login
+          </button>
+        </div>
+        <div
+          className='slider flex'
+          style={{
+            transform: switchLogin ? 'translateX(-100%)' : 'translateX(0%)'
+          }}
         >
-          Register
-        </button>
+          <div className='register bg-amber-100 p-8 rounded-b-2xl flex gap-2.5 flex-col items-center justify-around '>
+            <h2 className='text-3xl font-bold mb-6'>Register</h2>
+            <input
+              className='rounded-lg py-2 px-5 text-lg font-semibold outline-0 border-0 bg-white focus:outline-2 outline-blue-600'
+              type='text'
+              placeholder='Username'
+              name='username'
+              onChange={handleRegisterChange}
+              value={registerData.username}
+            />
+            <input
+              className='rounded-lg py-2 px-5 text-lg font-semibold outline-0 border-0 bg-white focus:outline-2 outline-blue-600'
+              type='text'
+              placeholder='Email'
+              name='email'
+              onChange={handleRegisterChange}
+              value={registerData.email}
+            />
+            <input
+              className='rounded-lg py-2 px-5 text-lg font-semibold outline-0 border-0 bg-white focus:outline-2 outline-blue-600'
+              type='text'
+              placeholder='Password'
+              name='password'
+              onChange={handleRegisterChange}
+              value={registerData.password}
+            />
+            <button
+              className='mt-5.5 py-2 px-6 bg-blue-600 text-white text-lg font-semibold font rounded-lg cursor-pointer hover:scale-105'
+              onClick={handleRegister}
+            >
+              Register
+            </button>
+          </div>
+          <div className='login bg-amber-100 p-8 rounded-b-2xl flex gap-2.5 flex-col items-center justify-around  '>
+            <h2 className='text-3xl font-bold mb-6'>Login</h2>
+            <input
+              className='rounded-lg py-2 px-5 text-lg font-semibold outline-0 border-0 bg-white focus:outline-2 outline-blue-600'
+              type='text'
+              placeholder='Email'
+              name='email'
+              onChange={handleLoginChange}
+              value={loginData.email}
+            />
+            <input
+              className='rounded-lg py-2 px-5 text-lg font-semibold outline-0 border-0 bg-white focus:outline-2 outline-blue-600'
+              type='text'
+              placeholder='Password'
+              name='password'
+              onChange={handleLoginChange}
+              value={loginData.password}
+            />
+            <button
+              className='mt-5.5 py-2 px-6 bg-blue-600 text-white text-lg font-semibold font rounded-lg cursor-pointer hover:scale-105'
+              onClick={handleLogin}
+            >
+              Login
+            </button>
+          </div>
+        </div>
       </div>
-      <div className='login bg-amber-100 p-8 rounded-b-2xl flex gap-2.5 flex-col items-center justify-around  '>
-        <h2 className='text-3xl font-bold mb-6'>Login</h2>
-        <input
-          className='rounded-lg py-2 px-5 text-lg font-semibold outline-0 border-0 bg-white focus:outline-2 outline-blue-600'
-          type='text'
-          placeholder='Email'
-          name='email'
-          onChange={handleLoginChange}
-          value={loginData.email}
-        />
-        <input
-          className='rounded-lg py-2 px-5 text-lg font-semibold outline-0 border-0 bg-white focus:outline-2 outline-blue-600'
-          type='text'
-          placeholder='Password'
-          name='password'
-          onChange={handleLoginChange}
-          value={loginData.password}
-        />
-        <button
-          className='mt-5.5 py-2 px-6 bg-blue-600 text-white text-lg font-semibold font rounded-lg cursor-pointer hover:scale-105'
-          onClick={handleLogin}
-        >
-          Login
-        </button>
-      </div>
-      </div>
-    </div>
+    </>
   )
 }
 

@@ -94,18 +94,16 @@ const AddCourses = () => {
 
   return (
     <div
-      className="flex items-center justify-center bg-[#121928] text-white min-h-[88vh] w-[80vw] absolute right-0"
-      style={{ marginTop: "12vh" }}
+      className="lg:p-12 py-12 px-4 min-h-screen flex items-center justify-center bg-[#121928] text-white mt-6 md:mt-12 lg:mt-16 w-full lg:w-[80vw] lg:absolute lg:right-0"
     >
-      <div className="bg-[#1C263C] shadow-2xl shadow-black rounded-xl min-h-[70vh] w-[40vw] flex flex-col gap-5 items-center justify-center">
+      <div className="add-course-form w-full max-w-md py-8 px-8 lg:px-12 bg-[#1C263C] shadow-2xl shadow-black rounded-xl flex flex-col gap-5 items-center justify-center">
         <h2
-          className="bg-zinc-900 rounded-4xl text-center text-2xl font-bold shadow-2xs shadow-amber-50"
-          style={{ margin: "40px 0 20px", padding: "10px 20px" }}
+          className="py-2 px-8 bg-zinc-900 rounded-4xl text-center lg:text-xl font-bold shadow-2xs shadow-amber-50"
         >
           Add Course
         </h2>
         <input
-          className="bg-[#1F2937] shadow-lg shadow-black text-lg font-semibold outline-0 rounded-2xl w-[80%]"
+          className="w-full bg-[#1F2937] shadow-lg shadow-black font-semibold outline-0 rounded-2xl"
           type="text"
           placeholder="Title .."
           value={formData.title}
@@ -116,7 +114,7 @@ const AddCourses = () => {
           style={{ padding: "10px 25px" }}
         />
         <textarea
-          className="bg-[#1F2937] shadow-lg shadow-black text-lg font-semibold outline-0 rounded-2xl w-[80%]"
+          className="w-full bg-[#1F2937] shadow-lg shadow-black font-semibold outline-0 rounded-2xl "
           name="description"
           placeholder="Description.."
           value={formData.description}
@@ -127,7 +125,7 @@ const AddCourses = () => {
           style={{ padding: "10px 25px" }}
         ></textarea>
         <input
-          className="bg-[#1F2937] shadow-lg shadow-black text-lg font-semibold outline-0 rounded-2xl w-[80%]"
+          className="w-full bg-[#1F2937] shadow-lg shadow-black  font-semibold outline-0 rounded-2xl "
           type="text"
           placeholder="Price .."
           value={formData.price}
@@ -137,14 +135,14 @@ const AddCourses = () => {
           required
           style={{ padding: "10px 25px" }}
         />
-        <label className="text-lg text-zinc-500 font-semibold" htmlFor="thumbnail">
+        <label className=" text-zinc-500 font-semibold" htmlFor="thumbnail">
           <i>Thumbnail*</i>
         </label>
         {/* Use formKey in key to force re-mount after reset */}
         <input
           key={`thumbnail-${formKey}`}
           id="thumbnail"
-          className="bg-[#1F2937] shadow-lg shadow-black text-lg font-semibold outline-0 rounded-2xl w-[80%]"
+          className="w-full bg-[#1F2937] shadow-lg shadow-black  font-semibold outline-0 rounded-2xl"
           name="thumbnail"
           type="file"
           onChange={handleThumbnailChange}
@@ -154,14 +152,14 @@ const AddCourses = () => {
 
         {/* Dynamic Video & Title Inputs */}
         {formData.lectures.map((lecture, index) => (
-          <div key={index} className="w-[80%]">
-            <label className="text-lg text-zinc-500 font-semibold">
+          <div key={index} className="flex flex-col">
+            <label className=" text-zinc-500 font-semibold">
               <i>Video {index + 1}*</i>
             </label>
             {/* Use formKey in key for video input */}
             <input
               key={`video-${index}-${formKey}`}
-              className="bg-[#1F2937] shadow-lg shadow-black text-lg font-semibold outline-0 rounded-2xl w-full"
+              className="w-full bg-[#1F2937] shadow-lg shadow-black  font-semibold outline-0 rounded-2xl"
               type="file"
               accept="video/*"
               onChange={(e) => handleVideoChange(index, e)}
@@ -169,7 +167,7 @@ const AddCourses = () => {
               style={{ padding: "10px 25px" }}
             />
             <input
-              className="bg-[#1F2937] shadow-lg shadow-black text-lg font-semibold outline-0 rounded-2xl w-full"
+              className="w-full bg-[#1F2937] shadow-lg shadow-black  font-semibold outline-0 rounded-2xl"
               type="text"
               placeholder="Video Title"
               value={lecture.videoTitle}
@@ -182,7 +180,7 @@ const AddCourses = () => {
 
         {/* Button to Add More Lectures */}
         <button
-          className="bg-green-600 text-white text-lg font-semibold font rounded-lg cursor-pointer hover:scale-105"
+          className="bg-green-600 text-white  font-semibold font rounded-lg cursor-pointer hover:scale-105"
           onClick={addLectureField}
           style={{ padding: "8px 15px", marginTop: "10px" }}
         >
@@ -190,9 +188,9 @@ const AddCourses = () => {
         </button>
 
         <button
-          className="bg-blue-600 text-white text-lg font-semibold font rounded-lg cursor-pointer hover:scale-105"
+          className="bg-blue-600 text-white  font-semibold font rounded-lg cursor-pointer hover:scale-105"
           onClick={handleUpload}
-          style={{ padding: "10px 15px", margin: "30px 0 40px" }}
+          style={{ padding: "10px 15px"}}
         >
           Add Course
         </button>

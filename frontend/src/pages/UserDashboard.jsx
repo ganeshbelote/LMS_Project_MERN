@@ -4,6 +4,7 @@ import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import SideBar from '../components/SideBar.jsx'
 
 const UserDashboard = () => {
+  const [role, setRole] = useState(null)
   const [userData, setUserData] = useState({})
   const userId = localStorage.getItem('id')
   const navigate = useNavigate()
@@ -16,6 +17,7 @@ const UserDashboard = () => {
     if (!token || !id || !role) {
       navigate('/')
     } else {
+      setRole(role)
       if (role === 'user') {
         navigate('/Home/dashboard')
       } else {
@@ -44,10 +46,10 @@ const UserDashboard = () => {
         <Navbar />
       </div>
       <div className='flex relative'>
-        <SideBar userData={userData}/>
+        <SideBar role={role} userData={userData} />
 
         {/* Main Content */}
-        <div className='flex-1 lg:ml-[20vw]'>
+        <div className='flex-1 lg:ml-[20vw] overflow-x-hidden'>
           <Outlet />
         </div>
       </div>

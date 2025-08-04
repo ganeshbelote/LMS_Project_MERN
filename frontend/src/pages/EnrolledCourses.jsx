@@ -44,7 +44,7 @@ const EnrolledCourses = () => {
 
   return (
     <div
-      className='dashboard mt-[9vh] w-[100vw] lg:w-[80vw] absolute right-0 '
+      className='dashboard mt-12 lg:mt-16 w-[100vw] lg:w-[80vw] absolute right-0 '
     >
       <div className='heading h-[12vh] w-full bg-[#0d121c] shadow-2xl shadow-white text-white flex items-center justify-center'>
         <h2
@@ -69,14 +69,11 @@ const EnrolledCourses = () => {
         {enrollments.map((enrollment, i) => (
           <div key={i}>
             <div
-              className='course text-white h-[52vh] w-[18vw] bg-[#1c263c] rounded-lg shadow-lg shadow-black cursor-pointer hover:scale-101 hover:transition-all flex flex-col items-center justify-between gap-2'
-              style={{
-                padding: '5% 1%'
-              }}
+              className='course p-4 min-w-3xs text-white bg-[#1c263c] rounded-lg shadow-lg shadow-black hover:scale-101 hover:transition-all flex flex-col items-center justify-center gap-3 relative'
               onClick={() => handleClick(i)}
             >
               <div
-                className='thumbnail h-[50%] w-[80%] rounded-lg'
+                className='thumbnail h-36 w-full rounded-lg'
                 style={{
                   backgroundImage: `url(http://localhost:8000/${enrollment.thumbnail.replace(
                     'public\\',
@@ -96,15 +93,15 @@ const EnrolledCourses = () => {
               </h2>
               <button
                 className='bg-green-600 text-white text-lg font-semibold font rounded-lg cursor-pointer hover:scale-105'
-                style={{ padding: '8px 10px', marginTop: '9px' }}
+                style={{ padding: '8px 10px' }}
               >
                 Enrolled
               </button>
             </div>
             {display ? (
               <div className='h-screen w-full absolute top-0 left-0 bg-[#00000080] flex items-center justify-center'>
-                <div className='player relative h-[80%] w-[90%] rounded-2xl bg-black flex items-center justify-center gap-5'>
-                  <div className='video h-[90%] w-[60%] flex flex-col gap-5 items-center justify-center'>
+                <div className='player p-3 relative h-[85%] w-[90%] rounded-2xl bg-black flex flex-col lg:flex-row items-center justify-center gap-5'>
+                  <div className='video p-3 overflow-hidden h-[90%] w-full lg:w-[60%] flex flex-col gap-2 items-center justify-center'>
                     <h2 className='text-white text-3xl font-bold'>
                       {videoList[currentIndex].title}
                     </h2>
@@ -114,13 +111,13 @@ const EnrolledCourses = () => {
                         currentIndex
                       ].videoPath.replace('public\\', '')}`}
                       controls
-                      width='640px'
-                      height='360px'
+                      width='100%'
+                      height='90%'
                       playing={true}
                       onEnded={handleEnded}
                     />
                   </div>
-                  <div className='videos min-h-[50%] max-h-[90%] w-[30%] flex flex-col items-center justify-evenly rounded-2xl border-2 border-zinc-600 bg-[#121928]'>
+                  <div className='videos min-h-[50%] max-h-[90%] w-full lg:w-[30%] flex flex-col items-center justify-evenly rounded-2xl border-2 border-zinc-600 bg-[#121928]'>
                     <div className='flex flex-col' style={{ marginTop: '10px' }}>
                       {videoList.map((video, index) => (
                         <button

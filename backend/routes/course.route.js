@@ -10,8 +10,7 @@ router.route("/").post(
   upload.fields([{ name: "thumbnail", maxCount: 1 }, { name: "videos", maxCount: 5 }]),
   addCourse
 )
-
-        .get(getAllCourses)
+.get(getAllCourses)
 
 router.route('/courseDetails').post(getCourseDetail)
 router.route('/enrollCourse').post(enrollCourse)

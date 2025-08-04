@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import Logo from '../assets/Logo.svg'
 import LogoutArrow from '../assets/LogoutArrow.svg'
 import { useNavigate } from 'react-router-dom'
@@ -6,7 +6,23 @@ import menuSvg from '../assets/menu.svg'
 import { NavLink } from 'react-router-dom'
 
 const Navbar = () => {
+  const [role, setRole] = useState(null)
   const [showMenu, setShowMenu] = useState(false)
+  const [dashboardRoute, setDashboardRoute] = useState(null)
+  const [profileRoute, setProfileRoute] = useState(null)
+
+  useEffect(() => {
+    const role = localStorage.getItem('role')
+    setRole(role)
+
+    if (role == 'admin') {
+      setDashboardRoute('/Admin/dashboard')
+      setProfileRoute('/Admin/profile')
+    } else {
+      setDashboardRoute('/Home/dashboard')
+      setProfileRoute('/Home/profile')
+    }
+  }, [])
   //Handling logout
   const navigate = useNavigate()
 
@@ -18,7 +34,7 @@ const Navbar = () => {
   }
 
   return (
-    <div className='nav p-2 px-10 lg:px-[10vw] w-full h-[63.2px] lg:h-[12vh] bg-zinc-900 flex items-center justify-between fixed top-0 z-30'>
+    <div className='nav p-2 px-10 lg:px-[10vw] w-full h-[63.2px] bg-zinc-900 flex items-center justify-between fixed top-0 z-30'>
       <div className='logo text-white text-xl md:text-2xl lg:text-3xl font-extrabold flex items-center gap-5'>
         <img className='md:h-8 lg:h-12' src={Logo} alt='Logo' />
         E-Learning
@@ -39,18 +55,45 @@ const Navbar = () => {
         </button>
         {showMenu && (
           <ul className='menuoptions rounded-2xl rounded-tr-none text-white absolute right-0 top-8 bg-black p-4 lg:hidden flex flex-col gap-3 '>
-            <NavLink to='/Home/dashboard' className={({ isActive }) =>`cursor-pointer ${isActive && "text-blue-600 font-bold"}`}>
+            <NavLink
+              to={dashboardRoute}
+              className={({ isActive }) =>
+                `cursor-pointer ${isActive && 'text-blue-600 font-bold'}`
+              }
+            >
               Home
             </NavLink>
-            <NavLink to='/profile' className={({ isActive }) =>`cursor-pointer ${isActive && "text-blue-600 font-bold"}`}>
+            <NavLink
+              to={profileRoute}
+              className={({ isActive }) =>
+                `cursor-pointer ${isActive && 'text-blue-600 font-bold'}`
+              }
+            >
               Profile
             </NavLink>
-            <NavLink
-              to='/Home/enrolled-courses'
-              className={({ isActive }) =>`cursor-pointer text-nowrap ${isActive && "text-blue-600 font-bold"}`}
-            >
-              Enrolled Courses
-            </NavLink>
+            {(role == 'user') ? (
+              <NavLink
+                to='/Home/enrolled-courses'
+                className={({ isActive }) =>
+                  `cursor-pointer text-nowrap ${
+                    isActive && 'text-blue-600 font-bold'
+                  }`
+                }
+              >
+                Enrolled Courses
+              </NavLink>
+            ) : (
+              <NavLink
+                to='/Admin/add-courses'
+                className={({ isActive }) =>
+                  `cursor-pointer text-nowrap ${
+                    isActive && 'text-blue-600 font-bold'
+                  }`
+                }
+              >
+                Add Courses
+              </NavLink>
+            )}
             <li>
               <button
                 className='text-nowrap flex-nowrap flex-row bg-red-600 py-2 px-5 text-white text-lg font-semibold rounded-lg cursor-pointer hover:scale-105 flex gap-1.5 items-center justify-center border-2 border-black'

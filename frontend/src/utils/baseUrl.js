@@ -1,3 +1,3 @@
-const baseUrl = "http://localhost:8000"
+const baseUrl = "https://lms-project-mern-49ws.onrender.com"
 
 export default baseUrl

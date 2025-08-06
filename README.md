@@ -10,9 +10,7 @@ This project includes advanced features like role-based access control, secure f
 
 ## 🚀 Live Demo
 
-- 🔗 **Frontend**: [Live on Vercel](#)
-- 🔗 **Backend**: [Live on Render](#)
-- 📽 **Demo Video**: [Watch on YouTube](#)
+- 🔗 **Live on**: [Live on](https://e-learning-website-by-ganesh.netlify.app/)
 
 ---
 

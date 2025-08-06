@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import courseBg from '../assets/coursesbg.png'
 import ReactPlayer from 'react-player'
+import baseUrl from '../utils/baseUrl'
 
 const EnrolledCourses = () => {
   const userId = localStorage.getItem('id')
@@ -28,7 +29,7 @@ const EnrolledCourses = () => {
   }
 
   useEffect(() => {
-    const url = 'http://localhost:8000/api/v1/courses/getAllEnrollments'
+    const url = `${baseUrl}/api/v1/courses/getAllEnrollments`
     const fetchEnrollments = async () => {
       const res = await fetch(url, {
         method: 'POST',
@@ -75,10 +76,7 @@ const EnrolledCourses = () => {
               <div
                 className='thumbnail h-36 w-full rounded-lg'
                 style={{
-                  backgroundImage: `url(http://localhost:8000/${enrollment.thumbnail.replace(
-                    'public\\',
-                    ''
-                  )})`,
+                  backgroundImage: `url(${enrollment.thumbnail})`,
                   backgroundSize: 'cover',
                   backgroundRepeat: 'no-repeat',
                   backgroundPosition: 'center'
@@ -107,9 +105,9 @@ const EnrolledCourses = () => {
                     </h2>
                     <ReactPlayer
                       ref={playerRef}
-                      url={`http://localhost:8000/${videoList[
+                      url={`${videoList[
                         currentIndex
-                      ].videoPath.replace('public\\', '')}`}
+                      ].url}`}
                       controls
                       width='100%'
                       height='90%'

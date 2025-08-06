@@ -4,6 +4,7 @@ import BgImg from '../assets/dashboardbg.png'
 import courseBg from '../assets/coursesbg.png'
 import { failureMsg, successMsg } from '../utils/message'
 import courseThumbnail from '../assets/19199494.jpg'
+import baseUrl from '../utils/baseUrl.js'
 
 const Dashboard = () => {
   const [searchTerm, setSearchTerm] = useState('')
@@ -13,7 +14,7 @@ const Dashboard = () => {
 
   const fetchCourseData = async () => {
     try {
-      const url = 'http://localhost:8000/api/v1/courses/'
+      const url = `${baseUrl}/api/v1/courses/`
 
       const res = await fetch(url, {
         method: 'GET',
@@ -42,7 +43,7 @@ const Dashboard = () => {
   const handleDeleteCourse = async id => {
     try {
       const result = await fetch(
-        'http://localhost:8000/api/v1/courses/deleteCourse',
+        `${baseUrl}/api/v1/courses/deleteCourse`,
         {
           method: 'DELETE',
           headers: {
@@ -66,7 +67,7 @@ const Dashboard = () => {
   return (
     <div className='dashboard md:mt-12 lg:mt-16 w-[100vw] lg:w-[80vw] lg:absolute right-0 overflow-x-hidden'>
       <div
-        className='hero p-6 h-[60vh] w-full text-white flex flex-col items-center justify-center'
+        className='hero pt-12 lg:pt-0 p-6 h-[60vh] w-full text-white flex flex-col items-center justify-center'
         style={{
           backgroundImage: `url(${BgImg})`,
           backgroundPosition: 'center',
@@ -74,7 +75,7 @@ const Dashboard = () => {
           backgroundRepeat: 'no-repeat'
         }}
       >
-        <div className='pos flex flex-col items-center gap-20'>
+        <div className='pos flex flex-col items-center gap-12'>
           <div className='text backdrop-blur-xs'>
             <h2 className='heading text-3xl lg:text-5xl font-bold text-center'>
               Find the Best Courses for You
@@ -96,7 +97,7 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
-      <div className='heading h-[12vh] w-full bg-[#0d121c] shadow-2xl shadow-white text-white flex items-center justify-center'>
+      <div className='heading p-6 w-full bg-[#0d121c] shadow-2xl shadow-white text-white flex items-center justify-center'>
         <h2
           className='bg-zinc-900  rounded-4xl text-center lg:text-2xl font-bold shadow-2xs shadow-amber-50'
           style={{
@@ -108,7 +109,7 @@ const Dashboard = () => {
       </div>
       <div
         id='courses'
-        className='courses p-6 w-full flex justify-center flex-wrap gap-5'
+        className='courses min-h-[calc(100vh-(60vh+92px))] p-6 w-full flex justify-center flex-wrap gap-5'
         style={{
           backgroundImage: `url(${courseBg})`,
           backgroundPosition: 'center',
@@ -116,8 +117,8 @@ const Dashboard = () => {
           backgroundRepeat: 'no-repeat'
         }}
       >
-        {filteredCourses.map((course, i) => (
-          <div
+        {filteredCourses.map((course, i) =>{ 
+          return (<div
             key={i}
             className='course p-4 min-w-3xs text-white bg-[#1c263c] rounded-lg shadow-lg shadow-black hover:scale-101 hover:transition-all flex flex-col items-center justify-center gap-3 relative'
           >
@@ -135,10 +136,7 @@ const Dashboard = () => {
               className='thumbnail h-36 w-full rounded-lg'
               style={{
                 backgroundImage: course.thumbnail
-                  ? `url(http://localhost:8000/${course.thumbnail.replace(
-                      'public\\',
-                      ''
-                    )})`
+                  ? `url(${course.thumbnail})`
                   : `url(${courseThumbnail})`,
                 backgroundSize: 'cover',
                 backgroundRepeat: 'no-repeat',
@@ -160,8 +158,8 @@ const Dashboard = () => {
             >
               Checkout Now
             </button>
-          </div>
-        ))}
+          </div>)
+        })}
       </div>
     </div>
   )

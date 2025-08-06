@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import Navbar from '../components/Navbar.jsx'
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import SideBar from '../components/SideBar.jsx'
+import baseUrl from '../utils/baseUrl.js'
 
 const UserDashboard = () => {
   const [role, setRole] = useState(null)
@@ -26,7 +27,7 @@ const UserDashboard = () => {
     }
 
     const getUserData = async () => {
-      const url = 'http://localhost:8000/api/v1/auth/'
+      const url = `${baseUrl}/api/v1/auth/`
       const res = await fetch(url, {
         method: 'POST',
         headers: {

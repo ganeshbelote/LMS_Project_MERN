@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import Navbar from '../components/Navbar'
 import ProfBg from '../assets/profbg.jpg'
 import userProfile from '../assets/userprof.jpg'
+import baseUrl from '../utils/baseUrl'
 
 const Profile = () => {
   const [userData, setUserData] = useState({})
@@ -9,7 +10,7 @@ const Profile = () => {
 
   useEffect(() => {
     const getUserData = async () => {
-      const url = 'http://localhost:8000/api/v1/auth/'
+      const url = `${baseUrl}/api/v1/auth/`
       const res = await fetch(url, {
         method: 'POST',
         headers: {

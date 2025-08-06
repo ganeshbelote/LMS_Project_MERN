@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { successMsg, failureMsg } from '../utils/message.js'
 import { useNavigate } from 'react-router-dom'
+import baseUrl from '../utils/baseUrl.js'
 
 const Form = () => {
   const navigate = useNavigate()
@@ -31,7 +32,7 @@ const Form = () => {
       return failureMsg('All fields are required !')
     }
     try {
-      const url = 'http://localhost:8000/api/v1/auth/register'
+      const url = `${baseUrl}/api/v1/auth/register`
 
       const res = await fetch(url, {
         method: 'POST',
@@ -83,7 +84,7 @@ const Form = () => {
       return failureMsg('All fields are required !')
     }
     try {
-      const url = 'http://localhost:8000/api/v1/auth/login'
+      const url = `${baseUrl}/api/v1/auth/login`
 
       const res = await fetch(url, {
         method: 'POST',

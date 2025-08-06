@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react'
-import courseDetailBg from '../assets/courseDetailBg.png'
+import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { failureMsg, successMsg } from '../utils/message'
+import { failureMsg, successMsg } from '../utils/message.js'
 import { ToastContainer } from 'react-toastify'
+import baseUrl from '../utils/baseUrl.js'
 
 const CourseDetail = () => {
   const navigate = useNavigate()
@@ -12,14 +12,16 @@ const CourseDetail = () => {
   const [isEnrolled, setIsEnrolled] = useState(false)
   const [loadingEnroll, setLoadingEnroll] = useState(false)
   const userId = localStorage.getItem('id')
+  
   useEffect(() => {
     const role = localStorage.getItem('role')
     setRole(role)
   }, [])
+
   useEffect(() => {
     // Fetch course details
     const fetchCourseDetails = async () => {
-      const url = `http://localhost:8000/api/v1/courses/courseDetails`
+      const url = `${baseUrl}/api/v1/courses/courseDetails`
       try {
         const res = await fetch(url, {
           method: 'POST',
@@ -35,7 +37,7 @@ const CourseDetail = () => {
 
     // Check if the user is enrolled in this course
     const checkEnrollment = async () => {
-      const url = 'http://localhost:8000/api/v1/courses/checkEnrollment'
+      const url = `${baseUrl}/api/v1/courses/checkEnrollment`
       try {
         const res = await fetch(url, {
           method: 'POST',
@@ -63,7 +65,7 @@ const CourseDetail = () => {
 
     if (!isEnrolled) {
       // Enroll in the course
-      const url = 'http://localhost:8000/api/v1/courses/enrollCourse'
+      const url = `${baseUrl}/api/v1/courses/enrollCourse`
       try {
         const res = await fetch(url, {
           method: 'POST',
@@ -78,7 +80,7 @@ const CourseDetail = () => {
       }
     } else {
       // Cancel enrollment
-      const url = 'http://localhost:8000/api/v1/courses/cancleEnroll'
+      const url = `${baseUrl}/api/v1/courses/cancleEnroll`
       try {
         const res = await fetch(url, {
           method: 'POST',
@@ -121,7 +123,7 @@ const CourseDetail = () => {
                 className={`${
                   isEnrolled ? 'bg-green-600' : 'bg-blue-600'
                 } text-white text-lg font-semibold rounded-lg cursor-pointer hover:scale-105`}
-                style={{ padding: '8px 10px'}}
+                style={{ padding: '8px 10px' }}
                 onClick={handleEnroll}
                 disabled={loadingEnroll}
               >
@@ -140,9 +142,7 @@ const CourseDetail = () => {
           <div
             className='h-[70%] w-full lg:w-[45%] rounded-xl shadow-zinc-500 shadow-md'
             style={{
-              backgroundImage: `url(http://localhost:8000/${
-                courseDetails.thumbnail?.split('\\').pop() || ''
-              })`,
+              backgroundImage: `url(${courseDetails.thumbnail})`,
               backgroundPosition: 'center',
               backgroundSize: 'cover',
               backgroundRepeat: 'no-repeat'

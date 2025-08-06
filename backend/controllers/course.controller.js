@@ -1,51 +1,62 @@
 import Course from '../models/course.model.js'
 import User from '../models/user.model.js'
-
+import processAndUploadVideo from "../utils/cloudinary.js"
+import cloudinary from '../config/cloudinary.js';
 
 export const addCourse = async (req, res) => {
   try {
-    const { title, description, price, videoTitles } = req.body
+    const { title, description, price, videoTitles } = req.body;
 
-    // Check if required files exist
     if (!req.files || !req.files.thumbnail || !req.files.videos) {
-      return res.status(400).json({ message: 'Missing files' })
+      return res.status(400).json({ message: 'Missing files' });
     }
 
-    // If videoTitles is not an array, convert it into one.
-    let videoTitlesArr = videoTitles
-    if (!Array.isArray(videoTitlesArr)) {
-      videoTitlesArr = [videoTitlesArr]
-    }
+    const videoTitlesArr = Array.isArray(videoTitles) ? videoTitles : [videoTitles];
 
-    // Map over uploaded videos and pair them with video titles
-    const videos = req.files.videos.map((file, index) => ({
-      title: videoTitlesArr[index] || 'Untitled',
-      videoPath: file.path
-    }))
+    const thumbnailUpload = await cloudinary.uploader.upload(
+      req.files.thumbnail[0].path,
+      {
+        folder: 'courses/thumbnails',
+        resource_type: 'image',
+      }
+    );
+    const thumbnailUrl = thumbnailUpload.secure_url;
 
-    // Create a new course document
+    const uploadedVideos = await Promise.all(
+      req.files.videos.map(async (file, index) => {
+        const uploadResult = await processAndUploadVideo(file.path, 'courses/videos');
+        return {
+          title: videoTitlesArr[index] || 'Untitled',
+          url: uploadResult.url,
+          public_id: uploadResult.public_id,
+        };
+      })
+    );
+
     const newCourse = new Course({
       title,
       description,
-      thumbnail: req.files.thumbnail[0].path,
       price,
-      videos
-    })
+      thumbnail: thumbnailUrl,
+      videos: uploadedVideos,
+    });
 
-    await newCourse.save()
+    await newCourse.save();
 
     res.status(200).json({
       ok: true,
       message: 'Data uploaded successfully',
-      course: newCourse
-    })
+      course: newCourse,
+    });
   } catch (error) {
-    console.error('Error in addCourse:', error)
-    res
-      .status(500)
-      .json({ ok: false, message: 'Upload failed !', error: error.message })
+    console.error('Error in addCourse:', error);
+    res.status(500).json({
+      ok: false,
+      message: 'Upload failed!',
+      error: error.message,
+    });
   }
-}
+};
 
 export const deleteCourse = async (req, res) => {
   const courseId = req.body.id

@@ -45,9 +45,9 @@ const EnrolledCourses = () => {
 
   return (
     <div
-      className='dashboard mt-12 lg:mt-16 w-[100vw] lg:w-[80vw] absolute right-0 '
+      className='dashboard w-[100vw] lg:w-[80vw] absolute right-0 '
     >
-      <div className='heading h-[12vh] w-full bg-[#0d121c] shadow-2xl shadow-white text-white flex items-center justify-center'>
+      <div className='heading p-4 w-full bg-[#0d121c] shadow-2xl shadow-white text-white flex items-center justify-center'>
         <h2
           className='bg-zinc-900  rounded-4xl text-center lg:text-2xl font-bold shadow-2xs shadow-amber-50'
           style={{

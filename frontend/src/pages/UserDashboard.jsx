@@ -50,7 +50,7 @@ const UserDashboard = () => {
         <SideBar role={role} userData={userData} />
 
         {/* Main Content */}
-        <div className='flex-1 lg:ml-[20vw] overflow-x-hidden'>
+        <div className='absolute top-[63.2px] right-0 flex-1 lg:ml-[20vw]'>
           <Outlet />
         </div>
       </div>

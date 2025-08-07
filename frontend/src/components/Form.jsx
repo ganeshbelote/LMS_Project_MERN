@@ -265,8 +265,8 @@ const Form = () => {
           </div>
         </div>
       </div>
-      <div className='wrapper lg:hidden w-83 overflow-hidden'>
-        <div className='switch-auth-section overflow-hidden bg-amber-100 flex justify-evenly items-center rounded-t-2xl'>
+      <div className='wrapper lg:hidden w-84 overflow-hidden'>
+        <div className='switch-auth-section w-full overflow-hidden bg-amber-100 flex justify-evenly items-center rounded-t-2xl'>
           <button
             onClick={() => setSwitchLogin(false)}
             className='w-1/2 h-full p-2.5 bg-blue-600 text-white text-lg font-semibold font cursor-pointer hover:scale-105'
@@ -283,12 +283,12 @@ const Form = () => {
           </button>
         </div>
         <div
-          className='slider flex'
+          className='slider flex w-[200%]'
           style={{
-            transform: switchLogin ? 'translateX(-100%)' : 'translateX(0%)'
+            transform: switchLogin ? 'translateX(-50%)' : 'translateX(0%)'
           }}
         >
-          <div className='register bg-amber-100 p-8 rounded-b-2xl flex gap-2.5 flex-col items-center justify-around '>
+          <div className='register w-full bg-amber-100 p-8 rounded-b-2xl flex gap-2.5 flex-col items-center justify-around '>
             <h2 className='text-3xl font-bold mb-6'>Register</h2>
             <input
               className='rounded-lg py-2 px-5 text-lg font-semibold outline-0 border-0 bg-white focus:outline-2 outline-blue-600'
@@ -321,7 +321,7 @@ const Form = () => {
               Register
             </button>
           </div>
-          <div className='login bg-amber-100 p-8 rounded-b-2xl flex gap-2.5 flex-col items-center justify-around  '>
+          <div className='login w-full bg-amber-100 p-8 rounded-b-2xl flex gap-2.5 flex-col items-center justify-around  '>
             <h2 className='text-3xl font-bold mb-6'>Login</h2>
             <input
               className='rounded-lg py-2 px-5 text-lg font-semibold outline-0 border-0 bg-white focus:outline-2 outline-blue-600'

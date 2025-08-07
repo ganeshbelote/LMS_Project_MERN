@@ -96,7 +96,7 @@ const AddCourses = () => {
   }
 
   return (
-    <div className='lg:p-12 py-12 px-4 min-h-screen flex items-center justify-center bg-[#121928] text-white mt-6 md:mt-12 lg:mt-16 w-full lg:w-[80vw] lg:absolute lg:right-0'>
+    <div className='lg:p-12 py-12 px-4 min-h-screen flex items-center justify-center bg-[#121928] text-white w-full lg:w-[80vw] lg:absolute lg:right-0'>
       <div className='add-course-form w-full max-w-md py-8 px-8 lg:px-12 bg-[#1C263C] shadow-2xl shadow-black rounded-xl flex flex-col gap-5 items-center justify-center'>
         <h2 className='py-2 px-8 bg-zinc-900 rounded-4xl text-center lg:text-xl font-bold shadow-2xs shadow-amber-50'>
           Add Course

@@ -65,9 +65,9 @@ const Dashboard = () => {
   }
 
   return (
-    <div className='dashboard md:mt-12 lg:mt-16 w-[100vw] lg:w-[80vw] lg:absolute right-0 overflow-x-hidden'>
+    <div className='dashboard w-[100vw] lg:w-[80vw] lg:absolute right-0 overflow-x-hidden'>
       <div
-        className='hero pt-12 lg:pt-0 p-6 h-[60vh] w-full text-white flex flex-col items-center justify-center'
+        className='hero lg:pt-0 p-6 h-[60vh] w-full text-white flex flex-col items-center justify-center'
         style={{
           backgroundImage: `url(${BgImg})`,
           backgroundPosition: 'center',
@@ -109,7 +109,7 @@ const Dashboard = () => {
       </div>
       <div
         id='courses'
-        className='courses min-h-[calc(100vh-(60vh+92px))] p-6 w-full flex justify-center flex-wrap gap-5'
+        className='courses p-6 w-full flex justify-center flex-wrap gap-5'
         style={{
           backgroundImage: `url(${courseBg})`,
           backgroundPosition: 'center',

@@ -4,9 +4,8 @@ import Navbar from '../components/Navbar'
 import SideBar from '../components/SideBar'
 import baseUrl from '../utils/baseUrl'
 
-
 const AdminDashboard = () => {
-  const [role,setRole] = useState(null)
+  const [role, setRole] = useState(null)
   const userId = localStorage.getItem('id')
   const [userData, setUserData] = useState({})
   const navigate = useNavigate()
@@ -44,9 +43,11 @@ const AdminDashboard = () => {
   return (
     <div>
       <Navbar />
-      <div className='flex'>
-        <SideBar role={role} userData={userData}/>
-        <Outlet />
+      <div className='flex relative'>
+        <SideBar role={role} userData={userData} />
+        <div className='absolute top-[63.2px] right-0 flex-1 lg:ml-[20vw]'>
+          <Outlet />
+        </div>
       </div>
     </div>
   )

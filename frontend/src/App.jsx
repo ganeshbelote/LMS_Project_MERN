@@ -1,38 +1,44 @@
 import './App.css'
-import Auth from './pages/Auth.jsx'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
-import UserDashboard from './pages/UserDashboard.jsx'
 import AdminDashboard from './pages/AdminDashboard.jsx'
 import EnrolledCourses from './pages/EnrolledCourses.jsx'
 import Dashboard from './components/Dashboard.jsx'
 import AddCourses from './pages/AddCourses.jsx'
 import CourseDetail from './components/CourseDetail.jsx'
 import Profile from './pages/Profile.jsx'
+import NotFound from './pages/NotFound.jsx'
+import RegisterForm from './components/RegisterForm.jsx'
+import LoginForm from './components/LoginForm.jsx'
+import Home from './pages/Home.jsx'
 
 function App () {
   const router = createBrowserRouter([
     {
-      path: '/',
-      element: <Auth />
+      path: '/login',
+      element: <LoginForm />
     },
     {
-      path: '/Home',
-      element: <UserDashboard />,
-      children: [
-        {
-          index: true,
-          path: 'dashboard',
-          element: <Dashboard />
-        },
-        {
-          path: 'enrolled-courses',
-          element: <EnrolledCourses />
-        },
-        {
-          path: 'profile',
-          element: <Profile />
-        }
-      ]
+      path: '/register',
+      element: <RegisterForm />
+    },
+    {
+      path: '/',
+      element: <Home />,
+      // children: [
+      //   {
+      //     index: true,
+      //     path: 'dashboard',
+      //     element: <Dashboard />
+      //   },
+      //   {
+      //     path: 'enrolled-courses',
+      //     element: <EnrolledCourses />
+      //   },
+      //   {
+      //     path: 'profile',
+      //     element: <Profile />
+      //   }
+      // ]
     },
     {
       path: '/Admin',
@@ -56,6 +62,10 @@ function App () {
     {
       path: '/:courseId',
       element: <CourseDetail />
+    },
+    {
+      path: '*',
+      element: <NotFound />
     }
   ])
 

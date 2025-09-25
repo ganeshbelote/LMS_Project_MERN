@@ -1,117 +1,95 @@
-import { useEffect, useState } from 'react'
-import Logo from '../assets/Logo.svg'
-import LogoutArrow from '../assets/LogoutArrow.svg'
-import { useNavigate } from 'react-router-dom'
-import menuSvg from '../assets/menu.svg'
-import { NavLink } from 'react-router-dom'
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import MenuBtn from './MenuBtn.jsx';
+// import MenuBtn from './MenuBtn';
 
-const Navbar = () => {
-  const [role, setRole] = useState(null)
-  const [showMenu, setShowMenu] = useState(false)
-  const [dashboardRoute, setDashboardRoute] = useState(null)
-  const [profileRoute, setProfileRoute] = useState(null)
+const Navbar = ({ isAuthenticated, user }) => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  useEffect(() => {
-    const role = localStorage.getItem('role')
-    setRole(role)
+  const handleMenuToggle = (state) => {
+    setIsMenuOpen(state);
+  };
 
-    if (role == 'admin') {
-      setDashboardRoute('/Admin/dashboard')
-      setProfileRoute('/Admin/profile')
-    } else {
-      setDashboardRoute('/Home/dashboard')
-      setProfileRoute('/Home/profile')
-    }
-  }, [])
-  //Handling logout
-  const navigate = useNavigate()
-
-  const handleLogout = () => {
-    localStorage.removeItem('token')
-    localStorage.removeItem('id')
-    localStorage.removeItem('role')
-    navigate('/')
-  }
+  const lmsOptions = [
+    'Dashboard',
+    'Courses',
+    'Progress',
+    'Announcements',
+    'Assignments',
+    'Quizzes',
+    'Grades',
+    'Community',
+    'Resources',
+    'Settings',
+    'Logout',
+  ];
 
   return (
-    <div className='nav p-2 px-10 lg:px-[10vw] w-full h-[63.2px] bg-zinc-900 flex items-center justify-between fixed top-0 z-30'>
-      <div className='logo text-white text-xl md:text-2xl lg:text-3xl font-extrabold flex items-center gap-5'>
-        <img className='md:h-8 lg:h-12' src={Logo} alt='Logo' />
-        E-Learning
+    <header className="w-full max-w-4xl bg-gray-100 p-4 flex justify-between items-center relative">
+      <h2 className="text-2xl font-bold text-purple-600">!Course</h2>
+      <div className="flex items-center">
+        {/* Menu Button for Mobile */}
+        <div className="md:hidden">
+          <MenuBtn onToggle={handleMenuToggle} />
+        </div>
+        {/* Desktop Search and Auth */}
+        <div className="hidden md:flex items-center space-x-4">
+          <input
+            type="text"
+            placeholder="Search your course..."
+            className="rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 py-2 px-4"
+          />
+          {isAuthenticated ? (
+            <div className="flex items-center space-x-2">
+              <img
+                src="https://via.placeholder.com/40"
+                alt="User"
+                className="w-10 h-10 rounded-full"
+              />
+              <div>
+                <p className="text-sm font-medium text-gray-700">{user.name}</p>
+                <p className="text-xs text-gray-500">Continue Your Journey And Achieve</p>
+              </div>
+            </div>
+          ) : (
+            <div className="space-x-2">
+              <a href="/login" className="text-purple-600 hover:underline">Login</a>
+              <a href="/register" className="text-purple-600 hover:underline">Register</a>
+            </div>
+          )}
+        </div>
       </div>
-      <div className='options relative'>
-        <button
-          className='hidden bg-red-600 py-2 px-5 text-white text-lg font-semibold font rounded-lg cursor-pointer hover:scale-105 md:hidden lg:flex items-center gap-1 border-2  border-black'
-          onClick={handleLogout}
-        >
-          <img className='h-4 lg:h-6' src={LogoutArrow} alt='LogoutArrow.svg' />
-          Log Out
-        </button>
-        <button
-          onClick={() => setShowMenu(prev => !prev)}
-          className='cursor-pointer block h-6 w-6 lg:hidden'
-        >
-          <img src={menuSvg} alt='menuBtn' />
-        </button>
-        {showMenu && (
-          <ul className='menuoptions rounded-2xl rounded-tr-none text-white absolute right-0 top-8 bg-black p-4 lg:hidden flex flex-col gap-3 '>
-            <NavLink
-              to={dashboardRoute}
-              className={({ isActive }) =>
-                `cursor-pointer ${isActive && 'text-blue-600 font-bold'}`
-              }
-            >
-              Home
-            </NavLink>
-            <NavLink
-              to={profileRoute}
-              className={({ isActive }) =>
-                `cursor-pointer ${isActive && 'text-blue-600 font-bold'}`
-              }
-            >
-              Profile
-            </NavLink>
-            {(role == 'user') ? (
-              <NavLink
-                to='/Home/enrolled-courses'
-                className={({ isActive }) =>
-                  `cursor-pointer text-nowrap ${
-                    isActive && 'text-blue-600 font-bold'
-                  }`
-                }
+      {/* Mobile Menu */}
+      <AnimatePresence>
+        {isMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
+            className="md:hidden absolute top-full left-0 w-full bg-white shadow-lg rounded-md p-4 z-10"
+          >
+            {lmsOptions.map((option) => (
+              <a
+                key={option}
+                href={`/${option.toLowerCase()}`}
+                className="block p-2 text-purple-600 hover:bg-purple-100 rounded"
+                onClick={() => setIsMenuOpen(false)}
               >
-                Enrolled Courses
-              </NavLink>
-            ) : (
-              <NavLink
-                to='/Admin/add-courses'
-                className={({ isActive }) =>
-                  `cursor-pointer text-nowrap ${
-                    isActive && 'text-blue-600 font-bold'
-                  }`
-                }
-              >
-                Add Courses
-              </NavLink>
+                {option}
+              </a>
+            ))}
+            {!isAuthenticated && (
+              <div className="flex space-x-2 mt-2">
+                <Link to="/login" className="text-purple-600 hover:underline">Login</Link>
+                <a href="/register" className="text-purple-600 hover:underline">Register</a>
+              </div>
             )}
-            <li>
-              <button
-                className='text-nowrap flex-nowrap flex-row bg-red-600 py-2 px-5 text-white text-lg font-semibold rounded-lg cursor-pointer hover:scale-105 flex gap-1.5 items-center justify-center border-2 border-black'
-                onClick={handleLogout}
-              >
-                <img
-                  className='h-4 lg:h-6'
-                  src={LogoutArrow}
-                  alt='LogoutArrow.svg'
-                />
-                <span>Log Out</span>
-              </button>
-            </li>
-          </ul>
+          </motion.div>
         )}
-      </div>
-    </div>
-  )
-}
+      </AnimatePresence>
+    </header>
+  );
+};
 
-export default Navbar
+export default Navbar;

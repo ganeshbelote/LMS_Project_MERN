@@ -1,0 +1,20 @@
+[33mb2fa79e[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mredesign[m[33m)[m Update : redesign for lms web app
+[33mdf6cb22[m[33m ([m[1;31morigin/main[m[33m, [m[1;32mmain[m[33m)[m Add workflow to keep Render awake
+[33m91cb863[m Add workflow to keep Render awake
+[33m03aa7e5[m Fixed : Add course section
+[33m80b2768[m Fixed : problems like oversize of course detail box and auth form translation fixed
+[33m62d229d[m Merge branch 'main' of https://github.com/ganeshbelote/LMS_Project_MERN
+[33m300440d[m Add : Redirect file to fix not found page error
+[33m7234f80[m Update README.md
+[33m4b7401b[m Changed : baseurl
+[33md32bcc3[m Set : node instead of nodemon
+[33mfc756ee[m Fixed : Setup Cloudinary for adding course
+[33m87617d2[m Fixed : made Responsive for all devices
+[33m9489090[m Fixed : Make web app responsive
+[33m9632ad6[m Merge branch 'main' of https://github.com/ganeshbelote/LMS_Project_MERN
+[33m3b368fe[m Fixed : cleanup of extra files
+[33mc55030b[m Fixed : git add problem related to documentations
+[33mc4fa436[m Create README.md
+[33mcb0faa5[m Documentation removed
+[33me8b9239[m deleted unnecessary files
+[33m2829cf4[m first commit

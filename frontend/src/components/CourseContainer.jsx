@@ -1,5 +1,5 @@
 import CourseCard from './CourseCard'
-import dummyimg from '../assets/19199494.jpg'
+import dummyimg from '../assets/image/19199494.jpg'
 
 const CourseContainer = ({ isLoading }) => {
   const courses = [
@@ -25,42 +25,21 @@ const CourseContainer = ({ isLoading }) => {
       image: 'https://via.placeholder.com/128x72'
     },
     {
-      id: 1,
+      id: 4,
       title: "Beginner's Guide to Frontend",
       instructor: 'Jane Doe',
       progress: 60,
       image: 'https://via.placeholder.com/128x72'
     },
     {
-      id: 2,
+      id: 5,
       title: "Beginner's Guide to Backend",
       instructor: 'John Smith',
       progress: 30,
       image: 'https://via.placeholder.com/128x72'
     },
     {
-      id: 3,
-      title: 'Product Design Basics',
-      instructor: 'Emily Brown',
-      progress: 85,
-      image: 'https://via.placeholder.com/128x72'
-    },
-    {
-      id: 1,
-      title: "Beginner's Guide to Frontend",
-      instructor: 'Jane Doe',
-      progress: 60,
-      image: 'https://via.placeholder.com/128x72'
-    },
-    {
-      id: 2,
-      title: "Beginner's Guide to Backend",
-      instructor: 'John Smith',
-      progress: 30,
-      image: 'https://via.placeholder.com/128x72'
-    },
-    {
-      id: 3,
+      id: 6,
       title: 'Product Design Basics',
       instructor: 'Emily Brown',
       progress: 85,
@@ -70,7 +49,7 @@ const CourseContainer = ({ isLoading }) => {
 
   return (
     <div className='max-w-4xl flex items-center justify-center flex-col'>
-      <h2 className='text-2xl font-bold text-purple-600 mb-4'>
+      <h2 className='text-2xl font-bold text-blue-600 mb-4'>
         Continue Watching
       </h2>
       {isLoading ? (

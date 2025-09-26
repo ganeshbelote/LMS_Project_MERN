@@ -1,7 +1,5 @@
-import './App.css'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import AdminDashboard from './pages/AdminDashboard.jsx'
-import EnrolledCourses from './pages/EnrolledCourses.jsx'
 import Dashboard from './components/Dashboard.jsx'
 import AddCourses from './pages/AddCourses.jsx'
 import CourseDetail from './components/CourseDetail.jsx'
@@ -9,7 +7,7 @@ import Profile from './pages/Profile.jsx'
 import NotFound from './pages/NotFound.jsx'
 import RegisterForm from './components/RegisterForm.jsx'
 import LoginForm from './components/LoginForm.jsx'
-import Home from './pages/Home.jsx'
+import Layout from './pages/Layout.jsx'
 
 function App () {
   const router = createBrowserRouter([
@@ -23,7 +21,7 @@ function App () {
     },
     {
       path: '/',
-      element: <Home />,
+      element: <Layout/>
       // children: [
       //   {
       //     index: true,
@@ -39,6 +37,10 @@ function App () {
       //     element: <Profile />
       //   }
       // ]
+    },
+    {
+      path: '/profile',
+      element: <Profile />
     },
     {
       path: '/Admin',

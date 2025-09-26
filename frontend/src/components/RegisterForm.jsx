@@ -21,7 +21,7 @@ const RegisterForm = () => {
         transition={{ duration: 0.5 }}
         className="bg-white rounded-lg shadow-lg p-8 w-full max-w-md"
       >
-        <h2 className="text-2xl font-bold text-purple-600 text-center mb-6">!Course</h2>
+        <h2 className="text-2xl font-bold text-blue-600 text-center mb-6">!Course</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700">Name</label>
@@ -30,7 +30,7 @@ const RegisterForm = () => {
               name="name"
               value={formData.name}
               onChange={handleChange}
-              className="outline-0 mt-1 py-1 px-4 border-b-2 block w-full focus:border-purple-500 focus:ring-purple-500"
+              className="outline-0 mt-1 py-1 px-4 border-b-2 block w-full focus:border-blue-500 focus:ring-blue-500"
               required
             />
           </div>
@@ -41,7 +41,7 @@ const RegisterForm = () => {
               name="email"
               value={formData.email}
               onChange={handleChange}
-              className="outline-0 mt-1 py-1 px-4 border-b-2 block w-full focus:border-purple-500 focus:ring-purple-500"
+              className="outline-0 mt-1 py-1 px-4 border-b-2 block w-full focus:border-blue-500 focus:ring-blue-500"
               required
             />
           </div>
@@ -52,7 +52,7 @@ const RegisterForm = () => {
               name="password"
               value={formData.password}
               onChange={handleChange}
-              className="outline-0 mt-1 py-1 px-4 border-b-2 block w-full focus:border-purple-500 focus:ring-purple-500"
+              className="outline-0 mt-1 py-1 px-4 border-b-2 block w-full focus:border-blue-500 focus:ring-blue-500"
               required
             />
           </div>
@@ -60,13 +60,13 @@ const RegisterForm = () => {
             whileHover={{ scale: 1.01 }}
             whileTap={{ scale: 0.99 }}
             type="submit"
-            className="cursor-pointer mt-4 w-full bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+            className="cursor-pointer mt-4 w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
           >
             Register
           </motion.button>
         </form>
         <p className="mt-2 text-center text-sm text-gray-600">
-          Already have an account? <a href="/login" className="text-purple-600 hover:underline">Login</a>
+          Already have an account? <a href="/login" className="text-blue-600 hover:underline">Login</a>
         </p>
       </motion.div>
     </div>

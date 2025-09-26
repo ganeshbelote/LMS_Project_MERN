@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import MenuBtn from './MenuBtn.jsx';
 // import MenuBtn from './MenuBtn';
@@ -11,6 +11,7 @@ const Navbar = ({ isAuthenticated, user }) => {
   };
 
   const lmsOptions = [
+    'Profile',
     'Dashboard',
     'Courses',
     'Progress',
@@ -26,18 +27,18 @@ const Navbar = ({ isAuthenticated, user }) => {
 
   return (
     <header className="w-full max-w-4xl bg-gray-100 p-4 flex justify-between items-center relative">
-      <h2 className="text-2xl font-bold text-purple-600">!Course</h2>
+      <h2 className="text-2xl font-bold text-blue-600">!Course</h2>
       <div className="flex items-center">
         {/* Menu Button for Mobile */}
-        <div className="md:hidden">
+        <div className="lg:hidden">
           <MenuBtn onToggle={handleMenuToggle} />
         </div>
         {/* Desktop Search and Auth */}
-        <div className="hidden md:flex items-center space-x-4">
+        <div className="hidden lg:flex items-center space-x-4">
           <input
             type="text"
             placeholder="Search your course..."
-            className="rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 py-2 px-4"
+            className="rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2 px-4"
           />
           {isAuthenticated ? (
             <div className="flex items-center space-x-2">
@@ -53,8 +54,8 @@ const Navbar = ({ isAuthenticated, user }) => {
             </div>
           ) : (
             <div className="space-x-2">
-              <a href="/login" className="text-purple-600 hover:underline">Login</a>
-              <a href="/register" className="text-purple-600 hover:underline">Register</a>
+              <a href="/login" className="text-blue-600 hover:underline"><button className='bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-800'>Login</button></a>
+              <a href="/register" className="text-blue-600 hover:underline"><button className='bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-800'>Register</button></a>
             </div>
           )}
         </div>
@@ -67,13 +68,13 @@ const Navbar = ({ isAuthenticated, user }) => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3 }}
-            className="md:hidden absolute top-full left-0 w-full bg-white shadow-lg rounded-md p-4 z-10"
+            className="lg:hidden absolute top-full left-0 w-full bg-white shadow-lg rounded-md p-4 z-10"
           >
             {lmsOptions.map((option) => (
               <a
                 key={option}
                 href={`/${option.toLowerCase()}`}
-                className="block p-2 text-purple-600 hover:bg-purple-100 rounded"
+                className="block p-2 text-blue-600 hover:bg-blue-100 rounded"
                 onClick={() => setIsMenuOpen(false)}
               >
                 {option}
@@ -81,8 +82,8 @@ const Navbar = ({ isAuthenticated, user }) => {
             ))}
             {!isAuthenticated && (
               <div className="flex space-x-2 mt-2">
-                <Link to="/login" className="text-purple-600 hover:underline">Login</Link>
-                <a href="/register" className="text-purple-600 hover:underline">Register</a>
+                <a href="/login" className="text-blue-600 hover:underline"><button className='bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-800'>Login</button></a>
+                <a href="/register" className="text-blue-600 hover:underline"><button className='bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-800'>Register</button></a>
               </div>
             )}
           </motion.div>

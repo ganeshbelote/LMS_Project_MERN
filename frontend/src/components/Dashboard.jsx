@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import BgImg from '../assets/dashboardbg.png'
-import courseBg from '../assets/coursesbg.png'
+import BgImg from '../assets/image/dashboardbg.png'
+import courseBg from '../assets/image/coursesbg.png'
 import { failureMsg, successMsg } from '../utils/message'
-import courseThumbnail from '../assets/19199494.jpg'
+import courseThumbnail from '../assets/image/19199494.jpg'
 import baseUrl from '../utils/baseUrl.js'
 
 const Dashboard = () => {

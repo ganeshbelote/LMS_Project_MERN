@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import CourseContainer from '../components/CourseContainer'
-import Navbar from '../components/Navbar'
+import ProgressContainer from '../components/ProgressContainer'
+import bgImg from '../assets/image/bg.jpg'
 
 const Home = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -21,16 +22,16 @@ const Home = () => {
   }, [])
 
   return (
-    <div className='min-h-screen bg-gray-100 flex flex-col items-center px-4'>
-      {/* Header */}
-      <Navbar />
-
+    <div className='bg-gray-100 flex flex-col items-center px-4'>
       {/* Hero Section */}
       <motion.div
         initial={{ opacity: 0, y: 5 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3, ease: 'easeIn' }}
-        className='bg-purple-200 rounded-lg shadow-lg p-6 w-full max-w-4xl text-center'
+        className='bg-blue-200 rounded-lg shadow-lg p-6 w-full min-h-64 max-w-4xl text-center bg-center bg-cover bg-no-repeat flex flex-col items-center justify-center'
+        style={{
+          backgroundImage : `linear-gradient(to bottom, rgba(59, 130, 246, 0.7), rgba(59, 130, 246, 0.3)),url(${bgImg})`
+        }}
       >
         <h3 className='text-xl font-semibold text-white mb-4'>
           Sharpen Your Skills With Professional Online Courses
@@ -43,6 +44,8 @@ const Home = () => {
           Join Now
         </motion.button>
       </motion.div>
+
+      <ProgressContainer/>
 
       {/* Courses Grid */}
       <div className='mt-6 w-fit text-white'>

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Outlet, useNavigate } from 'react-router-dom'
 import Navbar from '../components/Navbar'
-import SideBar from '../components/SideBar'
+import SideBar from '../components/Sidebar'
 import baseUrl from '../utils/baseUrl'
 
 const AdminDashboard = () => {

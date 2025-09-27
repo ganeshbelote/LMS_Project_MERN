@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import Navbar from '../components/Navbar'; // Assuming Navbar is in the same directory
-import Footer from '../components/Footer'; // Assuming Footer is in the same directory
+import Navbar from '../components/Shared/Navbar'; // Assuming Navbar is in the same directory
+import Footer from '../components/Shared/Footer'; // Assuming Footer is in the same directory
+import userImg from '../assets/image/user.png'
 
 const Profile = () => {
   const [isEditing, setIsEditing] = useState(false);
@@ -9,7 +10,7 @@ const Profile = () => {
     name: 'Alex',
     email: 'alex@example.com',
     bio: 'Passionate learner in web development.',
-    profileImage: 'https://via.placeholder.com/150',
+    profileImage: userImg,
   });
   const [formData, setFormData] = useState({ ...userData });
   const [imagePreview, setImagePreview] = useState(userData.profileImage);
@@ -69,7 +70,7 @@ const Profile = () => {
           transition={{ duration: 0.5 }}
           className="w-full max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-6"
         >
-          <h2 className="text-2xl font-bold text-purple-600 mb-6">Profile</h2>
+          <h2 className="text-2xl font-bold text-blue-600 mb-6">Profile</h2>
           
           {/* Personal Info */}
           <section className="mb-8">
@@ -77,7 +78,7 @@ const Profile = () => {
               <img
                 src={isEditing ? imagePreview : userData.profileImage}
                 alt="Profile"
-                className="w-24 h-24 rounded-full mr-4"
+                className="p-2 w-24 h-24 rounded-full border-4 border-blue-600 mr-4"
               />
               <div>
                 <h3 className="text-xl font-semibold text-gray-800">{userData.name}</h3>
@@ -90,7 +91,7 @@ const Profile = () => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setIsEditing(true)}
-                className="bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-purple-700"
+                className="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700"
               >
                 Edit Profile
               </motion.button>
@@ -103,7 +104,7 @@ const Profile = () => {
                     name="name"
                     value={formData.name}
                     onChange={handleInputChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                   />
                 </div>
                 <div>
@@ -113,7 +114,7 @@ const Profile = () => {
                     name="email"
                     value={formData.email}
                     onChange={handleInputChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                   />
                 </div>
                 <div>
@@ -122,7 +123,7 @@ const Profile = () => {
                     name="bio"
                     value={formData.bio}
                     onChange={handleInputChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                   />
                 </div>
                 <div>
@@ -139,7 +140,7 @@ const Profile = () => {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     type="submit"
-                    className="bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-purple-700"
+                    className="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700"
                   >
                     Save Changes
                   </motion.button>
@@ -163,7 +164,7 @@ const Profile = () => {
 
           {/* Enrolled Courses */}
           <section className="mb-8">
-            <h3 className="text-xl font-semibold text-purple-600 mb-4">Enrolled Courses</h3>
+            <h3 className="text-xl font-semibold text-blue-600 mb-4">Enrolled Courses</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {enrolledCourses.map((course) => (
                 <motion.div
@@ -174,7 +175,7 @@ const Profile = () => {
                   <h4 className="text-lg font-medium text-gray-800">{course.title}</h4>
                   <div className="w-full bg-gray-200 rounded-full h-2.5 mt-2">
                     <div 
-                      className="bg-purple-600 h-2.5 rounded-full"
+                      className="bg-blue-600 h-2.5 rounded-full"
                       style={{ width: `${course.progress}%` }}
                     ></div>
                   </div>
@@ -186,7 +187,7 @@ const Profile = () => {
 
           {/* Achievements */}
           <section className="mb-8">
-            <h3 className="text-xl font-semibold text-purple-600 mb-4">Achievements</h3>
+            <h3 className="text-xl font-semibold text-blue-600 mb-4">Achievements</h3>
             <ul className="list-disc list-inside space-y-2">
               {achievements.map((ach, index) => (
                 <li key={index} className="text-gray-600">{ach}</li>
@@ -196,10 +197,10 @@ const Profile = () => {
 
           {/* Purchase History */}
           <section className="mb-8">
-            <h3 className="text-xl font-semibold text-purple-600 mb-4">Purchase History</h3>
+            <h3 className="text-xl font-semibold text-blue-600 mb-4">Purchase History</h3>
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-purple-100">
+                <tr className="bg-blue-100">
                   <th className="p-2">Course</th>
                   <th className="p-2">Date</th>
                   <th className="p-2">Amount</th>
@@ -219,20 +220,20 @@ const Profile = () => {
 
           {/* Settings */}
           <section>
-            <h3 className="text-xl font-semibold text-purple-600 mb-4">Settings</h3>
+            <h3 className="text-xl font-semibold text-blue-600 mb-4">Settings</h3>
             <div className="space-y-4">
               <div className="flex justify-between items-center">
                 <span className="text-gray-600">Email Notifications</span>
                 <label className="relative inline-flex items-center cursor-pointer">
                   <input type="checkbox" className="sr-only peer" defaultChecked />
-                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                 </label>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-gray-600">Two-Factor Authentication</span>
                 <label className="relative inline-flex items-center cursor-pointer">
                   <input type="checkbox" className="sr-only peer" />
-                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                 </label>
               </div>
               <motion.button

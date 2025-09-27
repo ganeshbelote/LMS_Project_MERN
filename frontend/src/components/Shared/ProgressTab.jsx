@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion'
-import bellSvg from '../assets/svg/bell.svg'
-import menuSvg from '../assets/svg/menu.svg'
+import bellSvg from '../../assets/svg/bell.svg'
+import menuSvg from '../../assets/svg/menu.svg'
 
 const ProgressTab = ({ Title, Progress }) => {
   return (

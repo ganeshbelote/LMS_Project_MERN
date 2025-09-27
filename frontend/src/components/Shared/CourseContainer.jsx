@@ -1,5 +1,5 @@
 import CourseCard from './CourseCard'
-import dummyimg from '../assets/image/19199494.jpg'
+import dummyimg from '../../assets/image/19199494.jpg'
 
 const CourseContainer = ({ isLoading }) => {
   const courses = [
@@ -8,42 +8,36 @@ const CourseContainer = ({ isLoading }) => {
       title: "Beginner's Guide to Frontend",
       instructor: 'Jane Doe',
       progress: 60,
-      image: 'https://via.placeholder.com/128x72'
     },
     {
       id: 2,
       title: "Beginner's Guide to Backend",
       instructor: 'John Smith',
       progress: 30,
-      image: 'https://via.placeholder.com/128x72'
     },
     {
       id: 3,
       title: 'Product Design Basics',
       instructor: 'Emily Brown',
       progress: 85,
-      image: 'https://via.placeholder.com/128x72'
     },
     {
       id: 4,
       title: "Beginner's Guide to Frontend",
       instructor: 'Jane Doe',
       progress: 60,
-      image: 'https://via.placeholder.com/128x72'
     },
     {
       id: 5,
       title: "Beginner's Guide to Backend",
       instructor: 'John Smith',
       progress: 30,
-      image: 'https://via.placeholder.com/128x72'
     },
     {
       id: 6,
       title: 'Product Design Basics',
       instructor: 'Emily Brown',
       progress: 85,
-      image: 'https://via.placeholder.com/128x72'
     }
   ]
 

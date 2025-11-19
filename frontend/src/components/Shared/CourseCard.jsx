@@ -1,17 +1,27 @@
 import { motion } from 'framer-motion'
+import { useNavigate } from 'react-router-dom'
 
 const CourseCard = ({
   about = 'Development',
+  Id,
   title,
   instructor,
   progress,
   image
 }) => {
+
+  const navigate = useNavigate();
+
+  const handleRedirect = () => {
+    navigate(`/course/${Id}`);
+  }
+
   return (
     <motion.div
       whileHover={{ scale: 1.01 }}
       whileTap={{ scale: 0.99 }}
       className='bg-white rounded-lg shadow-md p-4 w-3xs text-black flex flex-col justify-between'
+      onClick={() => handleRedirect()}
     >
       <div className='up-section'>
         <img

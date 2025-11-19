@@ -100,7 +100,7 @@ const Sidebar = () => {
           <span>Settings</span>
         </NavLink>
         <NavLink
-          to='/logout'
+          to='/login'
           className={({ isActive }) =>
             `flex items-center space-x-2 rounded-lg py-1 px-2 ${
               isActive

@@ -61,6 +61,7 @@ const CourseContainer = ({ isLoading }) => {
           {courses.map(course => (
             <CourseCard
               key={course.id}
+              Id={course.id}
               title={course.title}
               instructor={course.instructor}
               progress={course.progress}

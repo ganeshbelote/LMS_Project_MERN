@@ -2,12 +2,14 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 // import AdminDashboard from './pages/AdminDashboard.jsx'
 import Dashboard from './components/Dashboard.jsx'
 import AddCourses from './pages/AddCourses.jsx'
-import CourseDetail from './components/CourseDetail.jsx'
+import CourseDetail from './components/CourseDetails/CourseDetail.jsx'
 import Profile from './pages/Profile.jsx'
 import NotFound from './pages/NotFound.jsx'
 import RegisterForm from './components/Auth/RegisterForm.jsx'
 import LoginForm from './components/Auth/LoginForm.jsx'
 import Layout from './pages/Layout.jsx'
+import Inbox from './pages/Inbox.jsx'
+import Task from './pages/Task.jsx'
 
 function App () {
   const router = createBrowserRouter([
@@ -42,6 +44,14 @@ function App () {
       path: '/profile',
       element: <Profile />
     },
+    {
+      path: '/inbox',
+      element: <Inbox />
+    },
+    {
+      path: '/task',
+      element: <Task />
+    },
     // {
     //   path: '/admin',
     //   element: <AdminDashboard />,
@@ -62,7 +72,7 @@ function App () {
     //   ]
     // },
     {
-      path: '/:courseId',
+      path: '/course/:courseId',
       element: <CourseDetail />
     },
     {

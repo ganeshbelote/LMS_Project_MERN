@@ -41,7 +41,7 @@ const Profilebar = () => {
           </div>
         </div>
         <div className='flex justify-around'>
-          <img className='p-2 border-2 rounded-full h-10 w-10 hover:scale-105 active:scale-100 transition-all duration-300 cursor-pointer' src={notificationImg} alt="notification" onClick={() => navigate('/notification')}/>
+          <img className='p-2 border-2 rounded-full h-10 w-10 hover:scale-105 active:scale-100 transition-all duration-300 cursor-pointer' src={notificationImg} alt="notification" onClick={() => navigate('/inbox')}/>
           <img className='p-2 border-2 rounded-full h-10 w-10 hover:scale-105 active:scale-100 transition-all duration-300 cursor-pointer' src={inboxImg} alt="inbox" onClick={() => navigate('/inbox')}/>
           <img className='p-2 border-2 rounded-full h-10 w-10 hover:scale-105 active:scale-100 transition-all duration-300 cursor-pointer' src={userImg} alt="user" onClick={() => navigate('/profile')}/>
         </div>

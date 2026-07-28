@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
+import { Play, Clock, Users } from 'lucide-react'
 
 const CourseCard = ({
   about = 'Development',
@@ -7,7 +8,9 @@ const CourseCard = ({
   title,
   instructor,
   progress,
-  image
+  image,
+  price,
+  description
 }) => {
 
   const navigate = useNavigate();
@@ -18,31 +21,57 @@ const CourseCard = ({
 
   return (
     <motion.div
-      whileHover={{ scale: 1.01 }}
-      whileTap={{ scale: 0.99 }}
-      className='bg-white rounded-lg shadow-md p-4 w-3xs text-black flex flex-col justify-between'
-      onClick={() => handleRedirect()}
+      whileHover={{ y: -4 }}
+      whileTap={{ scale: 0.98 }}
+      className='bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden cursor-pointer transition-shadow hover:shadow-md'
+      onClick={handleRedirect}
     >
-      <div className='up-section'>
-        <img
-          src={image}
-          alt={title}
-          className='w-full h-32 object-cover rounded-md mb-2'
-        />
-        <h3 className='mt-2 py-1 px-2 bg-blue-300 w-fit rounded-lg font-medium text-sm text-blue-600'>
-          {about}
-        </h3>
-        <h3 className='mt-1 text-lg font-medium'>{title}</h3>
-        <p className='text-sm text-gray-600'>Instructor: {instructor}</p>
+      <div className='relative h-40 bg-gray-200 overflow-hidden'>
+        {image ? (
+          <img
+            src={image}
+            alt={title}
+            className='w-full h-full object-cover'
+          />
+        ) : (
+          <div className='w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-100 to-blue-200'>
+            <Play className="w-10 h-10 text-blue-400" />
+          </div>
+        )}
+        {price && (
+          <div className='absolute top-2 right-2 bg-blue-600 text-white text-xs font-bold px-2 py-1 rounded-lg'>
+            ₹{price}
+          </div>
+        )}
       </div>
-      <div className='content'>
-        <div className='w-full bg-gray-200 rounded-full h-2.5 mt-2'>
-          <div
-            className='bg-blue-600 h-2.5 rounded-full'
-            style={{ width: `${progress}%` }}
-          ></div>
+      <div className='p-4'>
+        <span className='inline-block px-2 py-1 bg-blue-50 text-blue-600 text-xs font-medium rounded-md mb-2'>
+          {about}
+        </span>
+        <h3 className='font-semibold text-gray-800 mb-1 line-clamp-1'>{title}</h3>
+        {description && (
+          <p className='text-xs text-gray-500 mb-3 line-clamp-2'>{description}</p>
+        )}
+        <div className='flex items-center justify-between text-xs text-gray-500'>
+          <span className='flex items-center gap-1'>
+            <Users className="w-3 h-3" />
+            {instructor || 'Instructor'}
+          </span>
+          {progress !== undefined && (
+            <span className='flex items-center gap-1 text-blue-600 font-medium'>
+              <Clock className="w-3 h-3" />
+              {progress}%
+            </span>
+          )}
         </div>
-        <p className='text-sm text-gray-600 mt-1'>{progress}% Watched</p>
+        {progress > 0 && (
+          <div className='mt-3 w-full bg-gray-100 rounded-full h-1.5'>
+            <div
+              className='bg-blue-600 h-1.5 rounded-full transition-all'
+              style={{ width: `${Math.min(progress, 100)}%` }}
+            />
+          </div>
+        )}
       </div>
     </motion.div>
   )

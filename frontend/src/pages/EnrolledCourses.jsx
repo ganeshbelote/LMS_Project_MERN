@@ -1,153 +1,200 @@
-import React, { useEffect, useRef, useState } from 'react'
-import courseBg from '../assets/coursesbg.png'
+import { useState, useEffect, useRef } from 'react'
+import { motion } from 'framer-motion'
+import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
+import api from '../utils/api'
 import ReactPlayer from 'react-player'
-import baseUrl from '../utils/baseUrl'
+import { BookOpen, PlayCircle, X, ChevronRight, Clock, Film } from 'lucide-react'
 
 const EnrolledCourses = () => {
-  const userId = localStorage.getItem('id')
+  const { user } = useAuth()
+  const navigate = useNavigate()
   const [enrollments, setEnrollments] = useState([])
-  const [videoList, setVideoList] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [selectedCourse, setSelectedCourse] = useState(null)
   const [currentIndex, setCurrentIndex] = useState(0)
-  const [display, setDisplay] = useState(false)
   const playerRef = useRef(null)
 
-  const handleClick = i => {
-    setVideoList(enrollments[i].videos)
-    setDisplay(prev => !prev)
+  useEffect(() => {
+    fetchEnrollments()
+  }, [])
+
+  const fetchEnrollments = async () => {
+    try {
+      const res = await api.post('/courses/getAllEnrollments', {
+        userId: user?._id || localStorage.getItem('id')
+      })
+      if (res.data.ok) {
+        setEnrollments(res.data.data)
+      }
+    } catch {
+      // silently fail
+    } finally {
+      setLoading(false)
+    }
   }
 
-  // Function to change video
-  const changeVideo = index => {
+  const openCourse = (course) => {
+    setSelectedCourse(course)
+    setCurrentIndex(0)
+  }
+
+  const changeVideo = (index) => {
     setCurrentIndex(index)
   }
 
-  // Auto-play next video when current ends
   const handleEnded = () => {
-    if (currentIndex < videoList.length - 1) {
+    if (selectedCourse?.videos && currentIndex < selectedCourse.videos.length - 1) {
       setCurrentIndex(currentIndex + 1)
     }
   }
 
-  useEffect(() => {
-    const url = `${baseUrl}/api/v1/courses/getAllEnrollments`
-    const fetchEnrollments = async () => {
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId })
-      })
-
-      const result = await res.json()
-      setEnrollments(result.data)
-    }
-    fetchEnrollments()
-  }, [])
+  if (loading) {
+    return (
+      <div className="p-6 space-y-4">
+        <div className="animate-pulse space-y-4">
+          {[1,2,3].map(i => <div key={i} className="h-32 bg-gray-200 rounded-xl" />)}
+        </div>
+      </div>
+    )
+  }
 
   return (
-    <div
-      className='dashboard w-[100vw] lg:w-[80vw] absolute right-0 '
-    >
-      <div className='heading p-4 w-full bg-[#0d121c] shadow-2xl shadow-white text-white flex items-center justify-center'>
-        <h2
-          className='bg-zinc-900  rounded-4xl text-center lg:text-2xl font-bold shadow-2xs shadow-amber-50'
-          style={{
-            padding: '10px 20px'
-          }}
-        >
-          Enrolled Courses
-        </h2>
+    <div className="p-4 md:p-6 space-y-6 max-w-4xl mx-auto">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold text-gray-800">My Enrolled Courses</h2>
+        <span className="text-sm text-gray-500 bg-white px-3 py-1 rounded-full shadow-sm">
+          {enrollments.length} courses
+        </span>
       </div>
-      <div
-        className='courses relative w-full min-h-[100vh] flex justify-center flex-wrap gap-5'
-        style={{
-          padding: '10vh',
-          backgroundImage: `url(${courseBg})`,
-          backgroundPosition: 'center',
-          backgroundSize: 'cover',
-          backgroundRepeat: 'no-repeat'
-        }}
-      >
-        {enrollments.map((enrollment, i) => (
-          <div key={i}>
-            <div
-              className='course p-4 min-w-3xs text-white bg-[#1c263c] rounded-lg shadow-lg shadow-black hover:scale-101 hover:transition-all flex flex-col items-center justify-center gap-3 relative'
-              onClick={() => handleClick(i)}
+
+      {enrollments.length === 0 ? (
+        <div className="text-center py-16 bg-white rounded-2xl shadow-sm">
+          <BookOpen className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+          <h3 className="text-xl font-semibold text-gray-700 mb-2">No Enrolled Courses</h3>
+          <p className="text-gray-500 mb-6">Start learning by enrolling in a course</p>
+          <button
+            onClick={() => navigate('/')}
+            className="bg-blue-600 text-white px-6 py-2.5 rounded-xl hover:bg-blue-700 transition font-medium"
+          >
+            Browse Courses
+          </button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {enrollments.map((course, i) => (
+            <motion.div
+              key={course._id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.05 }}
+              className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
+              onClick={() => openCourse(course)}
             >
-              <div
-                className='thumbnail h-36 w-full rounded-lg'
-                style={{
-                  backgroundImage: `url(${enrollment.thumbnail})`,
-                  backgroundSize: 'cover',
-                  backgroundRepeat: 'no-repeat',
-                  backgroundPosition: 'center'
-                }}
-              ></div>
-              <h2 className='text-2xl font-bold'>{enrollment.title}</h2>
-              <p className='text-xl font-semibold text-zinc-500 text-center'>
-                {enrollment.description.slice(0, 20) + '...'}
-              </p>
-              <h2 className='text-2xl text-green-700 font-bold'>
-                {enrollment.price} Rs.
-              </h2>
-              <button
-                className='bg-green-600 text-white text-lg font-semibold font rounded-lg cursor-pointer hover:scale-105'
-                style={{ padding: '8px 10px' }}
-              >
-                Enrolled
-              </button>
-            </div>
-            {display ? (
-              <div className='h-screen w-full absolute top-0 left-0 bg-[#00000080] flex items-center justify-center'>
-                <div className='player p-3 relative h-[85%] w-[90%] rounded-2xl bg-black flex flex-col lg:flex-row items-center justify-center gap-5'>
-                  <div className='video p-3 overflow-hidden h-[90%] w-full lg:w-[60%] flex flex-col gap-2 items-center justify-center'>
-                    <h2 className='text-white text-3xl font-bold'>
-                      {videoList[currentIndex].title}
-                    </h2>
-                    <ReactPlayer
-                      ref={playerRef}
-                      url={`${videoList[
-                        currentIndex
-                      ].url}`}
-                      controls
-                      width='100%'
-                      height='90%'
-                      playing={true}
-                      onEnded={handleEnded}
-                    />
-                  </div>
-                  <div className='videos min-h-[50%] max-h-[90%] w-full lg:w-[30%] flex flex-col items-center justify-evenly rounded-2xl border-2 border-zinc-600 bg-[#121928]'>
-                    <div className='flex flex-col' style={{ marginTop: '10px' }}>
-                      {videoList.map((video, index) => (
-                        <button
-                          key={index}
-                          onClick={() => changeVideo(index)}
-                          style={{
-                            margin: '5px',
-                            padding: '10px 20px',
-                            cursor: 'pointer',
-                            backgroundColor:
-                              currentIndex === index ? 'blue' : 'gray',
-                            color: 'white',
-                            border: 'none'
-                          }}
-                          className='rounded-2xl text-lg font-semibold'
-                        >
-                          {video.title}
-                        </button>
-                      ))}
+              <div className="flex flex-col sm:flex-row">
+                <div className="relative h-32 sm:h-auto sm:w-40 flex-shrink-0 bg-gray-100">
+                  {course.thumbnail ? (
+                    <img src={course.thumbnail} alt={course.title} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <Film className="w-8 h-8 text-gray-300" />
                     </div>
+                  )}
+                  <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                    <PlayCircle className="w-10 h-10 text-white" />
                   </div>
-                  <button className='absolute top-5 right-10 text-white font-bold flex items-center justify-center cursor-pointer h-6 w-6 bg-red-700 rounded-full'
-                  onClick={()=>setDisplay(prev => !prev)}
-                  >X</button>
+                </div>
+                <div className="p-4 flex-1 min-w-0">
+                  <h3 className="font-semibold text-gray-800 truncate">{course.title}</h3>
+                  <p className="text-sm text-gray-500 mt-1 line-clamp-2">{course.description}</p>
+                  <div className="flex items-center gap-3 mt-3 text-xs text-gray-400">
+                    <span className="flex items-center gap-1">
+                      <Film className="w-3.5 h-3.5" />
+                      {course.videos?.length || 0} videos
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Clock className="w-3.5 h-3.5" />
+                      In Progress
+                    </span>
+                  </div>
+                </div>
+                <div className="hidden sm:flex items-center pr-4">
+                  <ChevronRight className="w-5 h-5 text-gray-300" />
                 </div>
               </div>
-            ) : (
-              ''
-            )}
+            </motion.div>
+          ))}
+        </div>
+      )}
+
+      {/* Video Player Modal */}
+      {selectedCourse && (
+        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
+          <div className="bg-gray-900 rounded-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col">
+            {/* Header */}
+            <div className="flex items-center justify-between p-4 border-b border-gray-700">
+              <h3 className="text-white font-semibold truncate pr-4">
+                {selectedCourse.title} - {selectedCourse.videos?.[currentIndex]?.title || 'Video'}
+              </h3>
+              <button
+                onClick={() => setSelectedCourse(null)}
+                className="text-gray-400 hover:text-white p-1 rounded-full hover:bg-gray-700 transition"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="flex flex-col lg:flex-row flex-1 overflow-hidden">
+              {/* Video Player */}
+              <div className="flex-1 bg-black flex items-center justify-center p-4">
+                {selectedCourse.videos?.[currentIndex]?.url ? (
+                  <ReactPlayer
+                    ref={playerRef}
+                    url={selectedCourse.videos[currentIndex].url}
+                    controls
+                    width="100%"
+                    height="100%"
+                    playing={true}
+                    onEnded={handleEnded}
+                    style={{ maxHeight: '60vh' }}
+                  />
+                ) : (
+                  <div className="text-center text-gray-500">
+                    <PlayCircle className="w-16 h-16 mx-auto mb-2" />
+                    <p>No video available</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Playlist */}
+              {selectedCourse.videos?.length > 0 && (
+                <div className="w-full lg:w-72 bg-gray-800 overflow-y-auto max-h-60 lg:max-h-full">
+                  <div className="p-3 border-b border-gray-700">
+                    <p className="text-sm text-gray-400 font-medium">Course Content</p>
+                  </div>
+                  <div className="p-2 space-y-1">
+                    {selectedCourse.videos.map((video, index) => (
+                      <button
+                        key={index}
+                        onClick={() => changeVideo(index)}
+                        className={`w-full text-left p-3 rounded-lg transition flex items-center gap-3 ${
+                          currentIndex === index
+                            ? 'bg-blue-600 text-white'
+                            : 'text-gray-300 hover:bg-gray-700'
+                        }`}
+                      >
+                        <PlayCircle className={`w-4 h-4 flex-shrink-0 ${currentIndex === index ? 'text-white' : 'text-gray-500'}`} />
+                        <span className="text-sm truncate">{video.title || `Video ${index + 1}`}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
-        ))}
-      </div>
+        </div>
+      )}
     </div>
   )
 }

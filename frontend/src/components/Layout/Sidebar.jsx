@@ -1,117 +1,77 @@
-import { NavLink } from 'react-router-dom'
-import homeImg from '../../assets/image/home.png'
-import inboxImg from '../../assets/image/envelope.png'
-import bookImg from '../../assets/image/book.png'
-import checklistImg from '../../assets/image/checklist.png'
-import peopleImg from '../../assets/image/people.png'
-import settingImg from '../../assets/image/setting.png'
-import exitImg from '../../assets/image/exit.png'
+import { NavLink, useNavigate } from 'react-router-dom'
+import { useAuth } from '../../context/AuthContext'
+import { LayoutDashboard, BookOpen, Users, Inbox, CheckSquare, Settings, LogOut, PlusCircle } from 'lucide-react'
 
 const Sidebar = () => {
+  const { role, logout } = useAuth()
+  const navigate = useNavigate()
+
+  const handleLogout = () => {
+    logout()
+    navigate('/login')
+  }
+
+  const navItems = [
+    { label: 'Dashboard', path: '/', icon: LayoutDashboard },
+    { label: 'Enrolled Courses', path: '/enrolled-courses', icon: BookOpen },
+    { label: 'Inbox', path: '/inbox', icon: Inbox },
+    { label: 'Tasks', path: '/task', icon: CheckSquare },
+  ]
+
+  if (role === 'admin') {
+    navItems.push({ label: 'Add Course', path: '/add-courses', icon: PlusCircle })
+  }
+
   return (
-    <div className='z-10 min-h-screen fixed top-0 left-0 bg-white w-64 p-4 rounded-lg shadow-lg flex flex-col justify-between'>
+    <div className='z-10 min-h-screen fixed top-0 left-0 bg-white w-64 p-5 rounded-lg shadow-lg flex flex-col justify-between'>
       <div>
-        <div className='space-y-4'>
-          <h3 className='text-sm text-gray-500 font-medium'>OVERVIEW</h3>
-          <NavLink
-            to='/'
-            className={({ isActive }) =>
-              `flex items-center space-x-1.5 rounded-lg py-1 px-2 ${
-                isActive
-                  ? 'text-blue-600 bg-blue-100'
-                  : 'text-gray-700 hover:text-blue-600 hover:bg-blue-100'
-              }`
-            }
-          >
-            <img className='h-6 -ml-0.5' src={homeImg} alt='home' />
-            <span>Dashboard</span>
-          </NavLink>
-
-          <NavLink
-            to='/inbox'
-            className={({ isActive }) =>
-              `flex items-center space-x-2 rounded-lg py-1 px-2 ${
-                isActive
-                  ? 'text-blue-600 bg-blue-100'
-                  : 'text-gray-700 hover:text-blue-600 hover:bg-blue-100'
-              }`
-            }
-          >
-            <img className='h-5' src={inboxImg} alt='inbox' />
-            <span>Inbox</span>
-          </NavLink>
-
-          <NavLink
-            to='/lesson'
-            className={({ isActive }) =>
-              `flex items-center space-x-2 rounded-lg py-1 px-2 ${
-                isActive
-                  ? 'text-blue-600 bg-blue-100'
-                  : 'text-gray-700 hover:text-blue-600 hover:bg-blue-100'
-              }`
-            }
-          >
-            <img className='h-5' src={bookImg} alt='book' />
-            <span>Lesson</span>
-          </NavLink>
-
-          <NavLink
-            to='/task'
-            className={({ isActive }) =>
-              `flex items-center space-x-2 rounded-lg py-1 px-2 ${
-                isActive
-                  ? 'text-blue-600 bg-blue-100'
-                  : 'text-gray-700 hover:text-blue-600 hover:bg-blue-100'
-              }`
-            }
-          >
-            <img className='h-4.5' src={checklistImg} alt='checklist' />
-            <span>Task</span>
-          </NavLink>
-
-          <NavLink
-            to='/group'
-            className={({ isActive }) =>
-              `flex items-center space-x-2 rounded-lg py-1 px-2 ${
-                isActive
-                  ? 'text-blue-600 bg-blue-100'
-                  : 'text-gray-700 hover:text-blue-600 hover:bg-blue-100'
-              }`
-            }
-          >
-            <img className='h-5' src={peopleImg} alt='people' />
-            <span>Group</span>
-          </NavLink>
+        <div className='mb-6 px-2'>
+          <h2 className='text-2xl font-bold text-blue-600'>!Course</h2>
+          <p className='text-xs text-gray-400 mt-1'>Learning Management</p>
+        </div>
+        <div className='space-y-1'>
+          <h3 className='text-xs text-gray-400 font-semibold uppercase tracking-wider px-2 mb-2'>Main Menu</h3>
+          {navItems.map(item => (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              end={item.path === '/'}
+              className={({ isActive }) =>
+                `flex items-center gap-3 rounded-lg py-2.5 px-3 transition-all ${
+                  isActive
+                    ? 'text-blue-600 bg-blue-50 font-medium'
+                    : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
+                }`
+              }
+            >
+              <item.icon className="w-5 h-5" />
+              <span>{item.label}</span>
+            </NavLink>
+          ))}
         </div>
       </div>
-      <div className='space-y-2'>
-        <h3 className='text-sm text-gray-500 font-medium'>SETTINGS</h3>
+      <div className='space-y-1 pt-4 border-t border-gray-100'>
+        <h3 className='text-xs text-gray-400 font-semibold uppercase tracking-wider px-2 mb-2'>Account</h3>
         <NavLink
-          to='/settings'
+          to='/profile'
           className={({ isActive }) =>
-            `flex items-center space-x-2 rounded-lg py-1 px-2 ${
+            `flex items-center gap-3 rounded-lg py-2.5 px-3 transition-all ${
               isActive
-                ? 'text-blue-600 bg-blue-100'
-                : 'text-gray-700 hover:text-blue-600 hover:bg-blue-100'
+                ? 'text-blue-600 bg-blue-50 font-medium'
+                : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
             }`
           }
         >
-          <img className='h-4.5' src={settingImg} alt='settings' />
-          <span>Settings</span>
+          <Settings className="w-5 h-5" />
+          <span>Profile</span>
         </NavLink>
-        <NavLink
-          to='/login'
-          className={({ isActive }) =>
-            `flex items-center space-x-2 rounded-lg py-1 px-2 ${
-              isActive
-                ? 'text-red-600 bg-red-100'
-                : 'text-red-600 hover:bg-red-100'
-            }`
-          }
+        <button
+          onClick={handleLogout}
+          className='w-full flex items-center gap-3 rounded-lg py-2.5 px-3 text-red-500 hover:bg-red-50 transition-all cursor-pointer'
         >
-          <img className='h-4 ml-0.5' src={exitImg} alt='logout' />
+          <LogOut className="w-5 h-5" />
           <span>Logout</span>
-        </NavLink>
+        </button>
       </div>
     </div>
   )

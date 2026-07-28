@@ -1,44 +1,69 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useNavigate, Link } from 'react-router-dom'
+import { useAuth } from '../../context/AuthContext'
 import MenuBtn from './MenuBtn.jsx'
 
-const Navbar = ({ isAuthenticated, user }) => {
+const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const { isAuthenticated, user, logout } = useAuth()
+  const navigate = useNavigate()
 
   const handleMenuToggle = state => {
     setIsMenuOpen(state)
   }
 
+  const handleLogout = () => {
+    logout()
+    navigate('/login')
+  }
+
   const lmsOptions = [
-    'Profile',
-    'Dashboard',
-    'Courses',
-    'Progress',
-    'Announcements',
-    'Assignments',
-    'Quizzes',
-    'Grades',
-    'Community',
-    'Resources',
-    'Settings',
-    'Logout'
+    { label: 'Dashboard', path: '/' },
+    { label: 'Courses', path: '/' },
+    { label: 'Enrolled Courses', path: '/enrolled-courses' },
+    { label: 'Profile', path: '/profile' },
+    { label: 'Inbox', path: '/inbox' },
+    { label: 'Tasks', path: '/task' },
   ]
 
   return (
     <header className='w-full max-w-4xl bg-gray-100 p-4 flex justify-between items-center relative'>
-      <h2 className='text-2xl font-bold text-blue-600'>!Course</h2>
-      <div className='flex items-center'>
+      <Link to="/" className='text-2xl font-bold text-blue-600'>!Course</Link>
+      <div className='flex items-center gap-3'>
+        {/* User info (desktop) */}
+        {isAuthenticated && user && (
+          <div className='hidden lg:flex items-center gap-2 bg-white rounded-full px-4 py-1.5 shadow-sm'>
+            <div className='w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold'>
+              {user?.username?.[0]?.toUpperCase() || 'U'}
+            </div>
+            <span className='text-sm font-medium text-gray-700'>{user?.username || 'User'}</span>
+          </div>
+        )}
         {/* Menu Button for Mobile */}
         <div className='lg:hidden'>
           <MenuBtn onToggle={handleMenuToggle} />
         </div>
         {/* Desktop Search and Auth */}
-        <div className='min-w-78 hidden lg:flex items-center space-x-4'>
+        <div className='hidden lg:flex items-center space-x-3'>
           <input
             type='text'
             placeholder='Search your course...'
-            className='w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2 px-4'
+            className='w-64 rounded-lg border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 py-2 px-4 outline-none'
           />
+          {isAuthenticated ? (
+            <button
+              onClick={handleLogout}
+              className='bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 text-sm font-medium transition-colors'
+            >
+              Logout
+            </button>
+          ) : (
+            <>
+              <Link to="/login" className='text-blue-600 font-medium hover:underline'>Login</Link>
+              <Link to="/register" className='bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-sm font-medium'>Register</Link>
+            </>
+          )}
         </div>
       </div>
       {/* Mobile Menu */}
@@ -49,30 +74,29 @@ const Navbar = ({ isAuthenticated, user }) => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3 }}
-            className='lg:hidden absolute top-full left-0 w-full bg-white shadow-lg rounded-md p-4 z-10'
+            className='lg:hidden absolute top-full left-0 w-full bg-white shadow-lg rounded-md p-4 z-50'
           >
             {lmsOptions.map(option => (
-              <a
-                key={option}
-                href={`/${option.toLowerCase()}`}
-                className='block p-2 text-blue-600 hover:bg-blue-100 rounded'
+              <Link
+                key={option.label}
+                to={option.path}
+                className='block p-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded transition-colors'
                 onClick={() => setIsMenuOpen(false)}
               >
-                {option}
-              </a>
+                {option.label}
+              </Link>
             ))}
-            {!isAuthenticated && (
+            {isAuthenticated ? (
+              <button
+                onClick={() => { handleLogout(); setIsMenuOpen(false); }}
+                className='w-full mt-2 bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 text-sm font-medium'
+              >
+                Logout
+              </button>
+            ) : (
               <div className='flex space-x-2 mt-2'>
-                <a href='/login' className='text-blue-600 hover:underline'>
-                  <button className='bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-800'>
-                    Login
-                  </button>
-                </a>
-                <a href='/register' className='text-blue-600 hover:underline'>
-                  <button className='bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-800'>
-                    Register
-                  </button>
-                </a>
+                <Link to='/login' className='flex-1 text-center bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 text-sm font-medium' onClick={() => setIsMenuOpen(false)}>Login</Link>
+                <Link to='/register' className='flex-1 text-center bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 text-sm font-medium' onClick={() => setIsMenuOpen(false)}>Register</Link>
               </div>
             )}
           </motion.div>

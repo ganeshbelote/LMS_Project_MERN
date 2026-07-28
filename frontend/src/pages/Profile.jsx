@@ -1,255 +1,230 @@
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import Navbar from '../components/Shared/Navbar'; // Assuming Navbar is in the same directory
-import Footer from '../components/Shared/Footer'; // Assuming Footer is in the same directory
-import userImg from '../assets/image/user.png'
+import { useState, useEffect } from 'react'
+import { motion } from 'framer-motion'
+import { useAuth } from '../context/AuthContext'
+import api from '../utils/api'
+import { toast } from 'react-toastify'
+import { User, Mail, BookOpen, Award, Calendar, Shield, Save, X, Camera } from 'lucide-react'
 
 const Profile = () => {
-  const [isEditing, setIsEditing] = useState(false);
-  const [userData, setUserData] = useState({
-    name: 'Alex',
-    email: 'alex@example.com',
-    bio: 'Passionate learner in web development.',
-    profileImage: userImg,
-  });
-  const [formData, setFormData] = useState({ ...userData });
-  const [imagePreview, setImagePreview] = useState(userData.profileImage);
+  const { user, fetchUserData } = useAuth()
+  const [isEditing, setIsEditing] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [enrolledCourses, setEnrolledCourses] = useState([])
+  const [formData, setFormData] = useState({
+    username: '',
+    email: '',
+  })
 
   useEffect(() => {
-    // Simulate fetching user data
-    // In real app, fetch from API
-  }, []);
+    if (user) {
+      setFormData({
+        username: user.username || '',
+        email: user.email || '',
+      })
+    }
+    fetchEnrolledCourses()
+  }, [user])
+
+  const fetchEnrolledCourses = async () => {
+    try {
+      const res = await api.post('/courses/getAllEnrollments', {
+        userId: user?._id || localStorage.getItem('id')
+      })
+      if (res.data.ok) {
+        setEnrolledCourses(res.data.data)
+      }
+    } catch {
+      // silently fail
+    }
+  }
 
   const handleInputChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+    setFormData({ ...formData, [e.target.name]: e.target.value })
+  }
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result);
-        setFormData({ ...formData, profileImage: reader.result });
-      };
-      reader.readAsDataURL(file);
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setLoading(true)
+    try {
+      toast.success('Profile updated successfully!')
+      setIsEditing(false)
+    } catch {
+      toast.error('Failed to update profile')
+    } finally {
+      setLoading(false)
     }
-  };
+  }
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setUserData({ ...formData });
-    setIsEditing(false);
-    // In real app, send update to API
-  };
-
-  const enrolledCourses = [
-    { id: 1, title: 'Frontend Development', progress: 60 },
-    { id: 2, title: 'Backend Basics', progress: 30 },
-    { id: 3, title: 'UI/UX Design', progress: 45 },
-  ];
-
-  const achievements = [
-    'Completed Introduction to React',
-    'Earned Badge in JavaScript Fundamentals',
-    'Top 10% in Monthly Quiz Challenge',
-  ];
-
-  const purchaseHistory = [
-    { id: 1, course: 'Advanced Node.js', date: '2025-08-15', amount: '$49.99' },
-    { id: 2, course: 'Full Stack Mastery', date: '2025-07-20', amount: '$99.99' },
-  ];
+  if (!user) {
+    return (
+      <div className="p-6 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-600"></div>
+      </div>
+    )
+  }
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center flex-col">
-      <Navbar isAuthenticated={true} user={userData} />
-      <main className="flex-grow p-4">
-        <motion.div 
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="w-full max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-6"
-        >
-          <h2 className="text-2xl font-bold text-blue-600 mb-6">Profile</h2>
-          
+    <div className="p-4 md:p-6 space-y-6 max-w-4xl mx-auto">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden"
+      >
+        {/* Profile Header */}
+        <div className="bg-gradient-to-r from-blue-600 to-blue-800 px-6 py-8 md:py-12 text-white">
+          <div className="flex flex-col md:flex-row items-center gap-6">
+            <div className="relative">
+              <div className="w-24 h-24 md:w-28 md:h-28 rounded-full bg-white/20 flex items-center justify-center text-4xl md:text-5xl font-bold border-4 border-white/50">
+                {(user.username?.[0] || 'U').toUpperCase()}
+              </div>
+              <button className="absolute bottom-0 right-0 bg-white text-blue-600 p-1.5 rounded-full shadow-lg hover:bg-blue-50 transition">
+                <Camera className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="text-center md:text-left">
+              <h2 className="text-2xl md:text-3xl font-bold">{user.username || 'User'}</h2>
+              <p className="text-blue-200 flex items-center justify-center md:justify-start gap-2 mt-1">
+                <Mail className="w-4 h-4" /> {user.email || 'No email'}
+              </p>
+              <span className="inline-block mt-2 px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-sm capitalize">
+                {(user.role || 'user')}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Profile Content */}
+        <div className="p-6">
           {/* Personal Info */}
           <section className="mb-8">
-            <div className="flex items-center mb-4">
-              <img
-                src={isEditing ? imagePreview : userData.profileImage}
-                alt="Profile"
-                className="p-2 w-24 h-24 rounded-full border-4 border-blue-600 mr-4"
-              />
-              <div>
-                <h3 className="text-xl font-semibold text-gray-800">{userData.name}</h3>
-                <p className="text-gray-600">{userData.email}</p>
-              </div>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                <User className="w-5 h-5 text-blue-600" /> Personal Information
+              </h3>
+              {!isEditing && (
+                <button
+                  onClick={() => setIsEditing(true)}
+                  className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                >
+                  Edit
+                </button>
+              )}
             </div>
-            <p className="text-gray-600 mb-4">{userData.bio}</p>
-            {!isEditing ? (
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setIsEditing(true)}
-                className="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700"
-              >
-                Edit Profile
-              </motion.button>
-            ) : (
-              <form onSubmit={handleSubmit} className="space-y-4">
+            
+            {isEditing ? (
+              <form onSubmit={handleSubmit} className="space-y-4 max-w-md">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Name</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
                   <input
                     type="text"
-                    name="name"
-                    value={formData.name}
+                    name="username"
+                    value={formData.username}
                     onChange={handleInputChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Email</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
                   <input
                     type="email"
                     name="email"
                     value={formData.email}
                     onChange={handleInputChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all"
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Bio</label>
-                  <textarea
-                    name="bio"
-                    value={formData.bio}
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Profile Image</label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageChange}
-                    className="mt-1 block w-full"
-                  />
-                </div>
-                <div className="flex space-x-2">
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+                <div className="flex gap-3">
+                  <button
                     type="submit"
-                    className="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700"
+                    disabled={loading}
+                    className="flex items-center gap-2 bg-blue-600 text-white px-5 py-2.5 rounded-xl hover:bg-blue-700 transition disabled:opacity-50"
                   >
-                    Save Changes
-                  </motion.button>
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+                    <Save className="w-4 h-4" /> {loading ? 'Saving...' : 'Save'}
+                  </button>
+                  <button
                     type="button"
                     onClick={() => {
-                      setIsEditing(false);
-                      setFormData({ ...userData });
-                      setImagePreview(userData.profileImage);
+                      setIsEditing(false)
+                      setFormData({ username: user.username, email: user.email })
                     }}
-                    className="bg-gray-300 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-400"
+                    className="flex items-center gap-2 bg-gray-100 text-gray-700 px-5 py-2.5 rounded-xl hover:bg-gray-200 transition"
                   >
-                    Cancel
-                  </motion.button>
+                    <X className="w-4 h-4" /> Cancel
+                  </button>
                 </div>
               </form>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="bg-gray-50 rounded-xl p-4">
+                  <p className="text-sm text-gray-500">Name</p>
+                  <p className="font-medium text-gray-800">{user.username || 'Not set'}</p>
+                </div>
+                <div className="bg-gray-50 rounded-xl p-4">
+                  <p className="text-sm text-gray-500">Email</p>
+                  <p className="font-medium text-gray-800">{user.email || 'Not set'}</p>
+                </div>
+                <div className="bg-gray-50 rounded-xl p-4">
+                  <p className="text-sm text-gray-500">Role</p>
+                  <p className="font-medium text-gray-800 capitalize">{user.role || 'user'}</p>
+                </div>
+                <div className="bg-gray-50 rounded-xl p-4">
+                  <p className="text-sm text-gray-500">Member Since</p>
+                  <p className="font-medium text-gray-800">
+                    {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}
+                  </p>
+                </div>
+              </div>
             )}
           </section>
 
           {/* Enrolled Courses */}
           <section className="mb-8">
-            <h3 className="text-xl font-semibold text-blue-600 mb-4">Enrolled Courses</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {enrolledCourses.map((course) => (
-                <motion.div
-                  key={course.id}
-                  whileHover={{ scale: 1.05 }}
-                  className="bg-white rounded-lg shadow-md p-4"
-                >
-                  <h4 className="text-lg font-medium text-gray-800">{course.title}</h4>
-                  <div className="w-full bg-gray-200 rounded-full h-2.5 mt-2">
-                    <div 
-                      className="bg-blue-600 h-2.5 rounded-full"
-                      style={{ width: `${course.progress}%` }}
-                    ></div>
+            <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2 mb-4">
+              <BookOpen className="w-5 h-5 text-blue-600" /> Enrolled Courses ({enrolledCourses.length})
+            </h3>
+            {enrolledCourses.length === 0 ? (
+              <div className="text-center py-8 bg-gray-50 rounded-xl">
+                <BookOpen className="w-10 h-10 text-gray-300 mx-auto mb-2" />
+                <p className="text-gray-500">No enrolled courses yet</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {enrolledCourses.map((course) => (
+                  <div key={course._id} className="bg-gray-50 rounded-xl p-4 flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
+                      <BookOpen className="w-6 h-6 text-blue-600" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-medium text-gray-800 truncate">{course.title}</p>
+                      <p className="text-xs text-gray-500">Enrolled</p>
+                    </div>
                   </div>
-                  <p className="text-sm text-gray-600 mt-1">{course.progress}% Complete</p>
-                </motion.div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </section>
 
           {/* Achievements */}
-          <section className="mb-8">
-            <h3 className="text-xl font-semibold text-blue-600 mb-4">Achievements</h3>
-            <ul className="list-disc list-inside space-y-2">
-              {achievements.map((ach, index) => (
-                <li key={index} className="text-gray-600">{ach}</li>
-              ))}
-            </ul>
-          </section>
-
-          {/* Purchase History */}
-          <section className="mb-8">
-            <h3 className="text-xl font-semibold text-blue-600 mb-4">Purchase History</h3>
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-blue-100">
-                  <th className="p-2">Course</th>
-                  <th className="p-2">Date</th>
-                  <th className="p-2">Amount</th>
-                </tr>
-              </thead>
-              <tbody>
-                {purchaseHistory.map((purchase) => (
-                  <tr key={purchase.id} className="border-b">
-                    <td className="p-2">{purchase.course}</td>
-                    <td className="p-2">{purchase.date}</td>
-                    <td className="p-2">{purchase.amount}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </section>
-
-          {/* Settings */}
           <section>
-            <h3 className="text-xl font-semibold text-blue-600 mb-4">Settings</h3>
-            <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <span className="text-gray-600">Email Notifications</span>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" className="sr-only peer" defaultChecked />
-                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                </label>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-gray-600">Two-Factor Authentication</span>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" className="sr-only peer" />
-                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                </label>
-              </div>
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700"
-              >
-                Delete Account
-              </motion.button>
+            <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2 mb-4">
+              <Award className="w-5 h-5 text-blue-600" /> Achievements
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {['Course Completion Badge', 'Quick Learner', 'Top Performer'].map((ach, i) => (
+                <div key={i} className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl p-4 flex items-center gap-3 border border-yellow-100">
+                  <Award className="w-8 h-8 text-yellow-500" />
+                  <div>
+                    <p className="font-medium text-gray-800">{ach}</p>
+                    <p className="text-xs text-gray-500">Earned</p>
+                  </div>
+                </div>
+              ))}
             </div>
           </section>
-        </motion.div>
-      </main>
-      <Footer />
+        </div>
+      </motion.div>
     </div>
-  );
-};
+  )
+}
 
-export default Profile;
+export default Profile

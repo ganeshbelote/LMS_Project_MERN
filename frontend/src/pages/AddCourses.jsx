@@ -98,7 +98,7 @@ const AddCourses = () => {
     }
   }
 
-  if (role !== 'admin') {
+  if (role !== 'Admin') {
     return (
       <div className="p-6 flex items-center justify-center">
         <div className="text-center">

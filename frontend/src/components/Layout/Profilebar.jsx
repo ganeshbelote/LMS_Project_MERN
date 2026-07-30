@@ -37,12 +37,6 @@ const Profilebar = () => {
             <Bell className="w-5 h-5 text-gray-600" />
           </button>
           <button
-            onClick={() => navigate('/inbox')}
-            className='p-2.5 border-2 border-gray-200 rounded-full hover:border-blue-300 hover:bg-blue-50 transition-all duration-200 cursor-pointer'
-          >
-            <InboxIcon className="w-5 h-5 text-gray-600" />
-          </button>
-          <button
             onClick={() => navigate('/profile')}
             className='p-2.5 border-2 border-gray-200 rounded-full hover:border-blue-300 hover:bg-blue-50 transition-all duration-200 cursor-pointer'
           >

@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import api from '../../utils/api'
+import { toast } from 'react-toastify'
 
 const LoginForm = () => {
   const [formData, setFormData] = useState({ email: '', password: '' })
@@ -25,12 +26,16 @@ const LoginForm = () => {
       const data = res.data
       if (data.ok) {
         login(data.token, data.user)
+        toast.success(`Welcome back, ${data.user.username}! 🎉`)
         navigate('/')
       } else {
         setError(data.message)
+        toast.error(data.message)
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Login failed. Please try again.')
+      const msg = err.response?.data?.message || 'Login failed. Please try again.'
+      setError(msg)
+      toast.error(msg)
     } finally {
       setLoading(false)
     }

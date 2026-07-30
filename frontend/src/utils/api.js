@@ -8,12 +8,12 @@ const api = axios.create({
   },
 });
 
-// Attach token to every request
+// Attach token to every request with Bearer prefix
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
     if (token) {
-      config.headers.Authorization = token;
+      config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },

@@ -36,8 +36,10 @@ export const AuthProvider = ({ children }) => {
   const login = (token, userData) => {
     localStorage.setItem('token', token);
     localStorage.setItem('id', userData.id);
-    localStorage.setItem('role', userData.role);
-    setUser(userData);
+    // Normalize role to lowercase to prevent case sensitivity issues
+    const normalizedRole = userData.role?.toLowerCase() || 'user';
+    localStorage.setItem('role', normalizedRole);
+    setUser({ ...userData, role: normalizedRole });
   };
 
   const logout = () => {

@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import { useNavigate, Link } from 'react-router-dom'
 import api from '../../utils/api'
+import { toast } from 'react-toastify'
 
 const RegisterForm = () => {
   const [formData, setFormData] = useState({ username: '', email: '', password: '' })
@@ -22,12 +23,16 @@ const RegisterForm = () => {
       const res = await api.post('/auth/register', formData)
       const data = res.data
       if (data.ok) {
+        toast.success('Account created successfully! 🎉 Please sign in.')
         navigate('/login')
       } else {
         setError(data.message)
+        toast.error(data.message)
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed. Please try again.')
+      const msg = err.response?.data?.message || 'Registration failed. Please try again.'
+      setError(msg)
+      toast.error(msg)
     } finally {
       setLoading(false)
     }

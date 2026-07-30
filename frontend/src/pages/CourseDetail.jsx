@@ -4,7 +4,8 @@ import { motion } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
 import api from '../utils/api'
 import { toast } from 'react-toastify'
-import { Bell, Clock, Users, Award, PlayCircle, CheckCircle, Lock, ArrowLeft, BookOpen, Star } from 'lucide-react'
+import { Bell, Clock, Users, Award, PlayCircle, CheckCircle, Lock, ArrowLeft, BookOpen, ExternalLink } from 'lucide-react'
+import VideoPlayer from '../components/Shared/VideoPlayer'
 
 const CourseDetail = () => {
   const { courseId } = useParams()
@@ -16,6 +17,7 @@ const CourseDetail = () => {
   const [enrolling, setEnrolling] = useState(false)
   const [activeTab, setActiveTab] = useState('overview')
   const [error, setError] = useState(null)
+  const [selectedVideo, setSelectedVideo] = useState(null)
 
   useEffect(() => {
     const fetchCourse = async () => {
@@ -43,6 +45,13 @@ const CourseDetail = () => {
     fetchCourse()
   }, [courseId, user])
 
+  // Auto-select first video when enrolled
+  useEffect(() => {
+    if (isEnrolled && course?.videos?.length > 0 && !selectedVideo) {
+      setSelectedVideo(course.videos[0])
+    }
+  }, [isEnrolled, course, selectedVideo])
+
   const handleEnroll = async () => {
     if (!isAuthenticated) {
       navigate('/login')
@@ -56,7 +65,7 @@ const CourseDetail = () => {
       })
       if (res.data.ok) {
         setIsEnrolled(true)
-        toast.success('Successfully enrolled!')
+        toast.success('Successfully enrolled! 🎉')
       } else {
         toast.error(res.data.message)
       }
@@ -65,6 +74,10 @@ const CourseDetail = () => {
     } finally {
       setEnrolling(false)
     }
+  }
+
+  const handleVideoSelect = (video) => {
+    setSelectedVideo(video)
   }
 
   if (loading) {
@@ -91,14 +104,6 @@ const CourseDetail = () => {
   }
 
   const progress = isEnrolled ? 60 : 0
-
-  const curriculum = course.videos?.map((v, i) => ({
-    id: i + 1,
-    title: v.title,
-    duration: `${Math.floor(Math.random() * 60) + 10}m`,
-    lessons: Math.floor(Math.random() * 10) + 5,
-    completed: i < 2
-  })) || []
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -150,6 +155,20 @@ const CourseDetail = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
+            {/* Video Player Section (shown when enrolled and video selected) */}
+            {isEnrolled && selectedVideo && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-white rounded-2xl shadow-xl overflow-hidden"
+              >
+                <VideoPlayer 
+                  videoUrl={selectedVideo.url} 
+                  videoTitle={selectedVideo.title}
+                />
+              </motion.div>
+            )}
+
             {/* Course Card */}
             <motion.div 
               initial={{ opacity: 0, y: 30 }}
@@ -179,6 +198,12 @@ const CourseDetail = () => {
                   <motion.button
                     whileHover={{ scale: 1.01 }}
                     whileTap={{ scale: 0.99 }}
+                    onClick={() => {
+                      if (course.videos?.length > 0) {
+                        setSelectedVideo(course.videos[0])
+                        setActiveTab('curriculum')
+                      }
+                    }}
                     className="flex-1 bg-blue-600 text-white py-3 md:py-4 px-6 md:px-8 rounded-xl font-semibold text-base md:text-lg shadow-lg flex items-center justify-center gap-3 hover:bg-blue-700 transition"
                   >
                     <PlayCircle className="w-5 h-5 md:w-6 md:h-6" />
@@ -240,32 +265,52 @@ const CourseDetail = () => {
               {activeTab === 'curriculum' && (
                 <div className="space-y-3">
                   <h3 className="text-xl font-semibold mb-4">
-                    Course Content ({curriculum.length} sections)
+                    Course Content ({course.videos?.length || 0} videos)
                   </h3>
-                  {curriculum.length === 0 ? (
-                    <p className="text-gray-500 text-center py-8">No curriculum available yet</p>
+                  {!course.videos || course.videos.length === 0 ? (
+                    <p className="text-gray-500 text-center py-8">No videos available yet</p>
                   ) : (
-                    curriculum.map((section) => (
+                    course.videos.map((video, index) => (
                       <motion.div
-                        key={section.id}
+                        key={index}
                         whileHover={{ x: 3 }}
-                        className="bg-gray-50 rounded-xl p-4 md:p-6 cursor-pointer transition-all hover:shadow-md"
+                        onClick={() => {
+                          if (isEnrolled) {
+                            setSelectedVideo(video)
+                          }
+                        }}
+                        className={`bg-gray-50 rounded-xl p-4 md:p-6 transition-all hover:shadow-md ${
+                          isEnrolled ? 'cursor-pointer' : 'cursor-default'
+                        } ${selectedVideo?.url === video.url ? 'ring-2 ring-blue-500 bg-blue-50' : ''}`}
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3 md:gap-4">
-                            {section.completed ? (
-                              <CheckCircle className="w-6 h-6 md:w-8 md:h-8 text-green-500 flex-shrink-0" />
-                            ) : (
-                              <Lock className="w-6 h-6 md:w-8 md:h-8 text-gray-400 flex-shrink-0" />
-                            )}
+                            <div className={`w-8 h-8 md:w-10 md:h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                              selectedVideo?.url === video.url 
+                                ? 'bg-blue-600 text-white' 
+                                : isEnrolled 
+                                  ? 'bg-green-100 text-green-600'
+                                  : 'bg-gray-200 text-gray-400'
+                            }`}>
+                              {isEnrolled ? (
+                                <PlayCircle className="w-5 h-5" />
+                              ) : (
+                                <Lock className="w-5 h-5" />
+                              )}
+                            </div>
                             <div className="min-w-0">
-                              <h4 className="font-semibold text-sm md:text-base truncate">{section.title}</h4>
-                              <p className="text-xs md:text-sm text-gray-500">
-                                {section.lessons} lessons • {section.duration}
+                              <h4 className="font-semibold text-sm md:text-base truncate">
+                                {video.title || `Lecture ${index + 1}`}
+                              </h4>
+                              <p className="text-xs text-gray-500">
+                                {index === 0 ? 'Getting started' : `Chapter ${index + 1}`}
                               </p>
                             </div>
                           </div>
-                          <Clock className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                          {!isEnrolled && <Lock className="w-4 h-4 text-gray-400 flex-shrink-0" />}
+                          {isEnrolled && (
+                            <ExternalLink className="w-4 h-4 text-blue-500 flex-shrink-0" />
+                          )}
                         </div>
                       </motion.div>
                     ))

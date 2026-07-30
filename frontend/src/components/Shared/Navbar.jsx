@@ -6,7 +6,7 @@ import MenuBtn from './MenuBtn.jsx'
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const { isAuthenticated, user, logout } = useAuth()
+  const { isAuthenticated, user, logout, role } = useAuth()
   const navigate = useNavigate()
   const menuBtnRef = useRef(null)
 
@@ -25,7 +25,6 @@ const Navbar = () => {
     logout()
     navigate('/login')
   }
-
   const lmsOptions = [
     { label: 'Dashboard', path: '/' },
     { label: 'Courses', path: '/' },
@@ -34,6 +33,11 @@ const Navbar = () => {
     { label: 'Inbox', path: '/inbox' },
     { label: 'Tasks', path: '/task' },
   ]
+
+  // Add "Add Course" for admin users in mobile menu
+  if (role?.toLowerCase() === 'admin') {
+    lmsOptions.push({ label: 'Add Course', path: '/add-courses' })
+  }
 
   return (
     <header className='w-full max-w-4xl bg-gray-100 p-4 flex justify-between items-center relative'>

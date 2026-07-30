@@ -5,334 +5,395 @@ import cloudinary from '../config/cloudinary.js';
 
 export const addCourse = async (req, res) => {
   try {
-    const { title, description, price, videoTitles } = req.body;
+    const { title, description, price, videoUrls, videoTitles } = req.body;
 
-    if (!req.files || !req.files.thumbnail || !req.files.videos) {
-      return res.status(400).json({ message: 'Missing files' });
+    // Validate required fields
+    if (!title || !description || !price) {
+      return res.status(400).json({
+        ok: false,
+        message: 'Title, description, and price are required!',
+        details: { title: !!title, description: !!description, price: !!price }
+      });
     }
 
-    const videoTitlesArr = Array.isArray(videoTitles) ? videoTitles : [videoTitles];
+    let thumbnailUrl = '';
 
-    const thumbnailUpload = await cloudinary.uploader.upload(
-      req.files.thumbnail[0].path,
-      {
-        folder: 'courses/thumbnails',
-        resource_type: 'image',
+    // Handle thumbnail - either file upload or URL
+    if (req.files && req.files.thumbnail) {
+      try {
+        const thumbnailUpload = await cloudinary.uploader.upload(
+          req.files.thumbnail[0].path,
+          { folder: 'courses/thumbnails', resource_type: 'image' }
+        );
+        thumbnailUrl = thumbnailUpload.secure_url;
+      } catch (uploadErr) {
+        console.error('Thumbnail upload error:', uploadErr);
+        return res.status(500).json({
+          ok: false,
+          message: 'Failed to upload thumbnail image!',
+          error: uploadErr.message
+        });
       }
-    );
-    const thumbnailUrl = thumbnailUpload.secure_url;
+    } else {
+      return res.status(400).json({
+        ok: false,
+        message: 'Thumbnail image is required!'
+      });
+    }
 
-    const uploadedVideos = await Promise.all(
-      req.files.videos.map(async (file, index) => {
-        const uploadResult = await processAndUploadVideo(file.path, 'courses/videos');
-        return {
-          title: videoTitlesArr[index] || 'Untitled',
-          url: uploadResult.url,
-          public_id: uploadResult.public_id,
-        };
-      })
-    );
+    // Build videos array from URLs or file uploads
+    let videos = [];
+
+    // Case 1: Video URLs provided (from frontend form)
+    if (videoUrls) {
+      const urlArr = Array.isArray(videoUrls) ? videoUrls : [videoUrls];
+      const titleArr = videoTitles
+        ? (Array.isArray(videoTitles) ? videoTitles : [videoTitles])
+        : [];
+
+      videos = urlArr.map((url, index) => ({
+        title: titleArr[index] || `Lecture ${index + 1}`,
+        url: url,
+        public_id: url // Store URL as public_id for URL-based videos
+      }));
+    }
+
+    // Case 2: Video files uploaded (legacy support)
+    if (req.files && req.files.videos && req.files.videos.length > 0) {
+      const videoTitlesArr = videoTitles
+        ? (Array.isArray(videoTitles) ? videoTitles : [videoTitles])
+        : [];
+
+      const uploadedVideos = await Promise.all(
+        req.files.videos.map(async (file, index) => {
+          try {
+            const uploadResult = await processAndUploadVideo(file.path, 'courses/videos');
+            return {
+              title: videoTitlesArr[index] || 'Untitled',
+              url: uploadResult.url,
+              public_id: uploadResult.public_id,
+            };
+          } catch (videoErr) {
+            console.error(`Video upload error at index ${index}:`, videoErr);
+            return {
+              title: videoTitlesArr[index] || 'Untitled',
+              url: '',
+              public_id: 'upload_failed'
+            };
+          }
+        })
+      );
+      videos = [...videos, ...uploadedVideos];
+    }
+
+    if (videos.length === 0) {
+      return res.status(400).json({
+        ok: false,
+        message: 'At least one video URL or file is required!'
+      });
+    }
 
     const newCourse = new Course({
       title,
       description,
-      price,
+      price: Number(price),
       thumbnail: thumbnailUrl,
-      videos: uploadedVideos,
+      videos,
     });
 
     await newCourse.save();
 
-    res.status(200).json({
+    console.log(`✅ Course created: ${newCourse.title} (${newCourse._id})`);
+
+    return res.status(200).json({
       ok: true,
-      message: 'Data uploaded successfully',
-      course: newCourse,
+      message: 'Course added successfully!',
+      course: {
+        id: newCourse._id,
+        title: newCourse.title,
+        description: newCourse.description,
+        price: newCourse.price,
+        thumbnail: newCourse.thumbnail,
+        videosCount: newCourse.videos.length
+      },
     });
   } catch (error) {
-    console.error('Error in addCourse:', error);
-    res.status(500).json({
+    console.error('❌ Error in addCourse:', error);
+    console.error('Stack:', error.stack);
+    return res.status(500).json({
       ok: false,
-      message: 'Upload failed!',
-      error: error.message,
+      message: 'Failed to add course. Please try again.',
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error',
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
 };
 
 export const deleteCourse = async (req, res) => {
-  const courseId = req.body.id
-
-  if(!courseId){
-    return res.status(404).json({
-      ok: false,
-      message: 'Invalid Course Id !'
-    })
-  }
-
-  const course = await Course.findByIdAndDelete(courseId)
-
-  if(!course){
-    return res.status(404).json({
-      ok: false,
-      message: 'Course Not Found !'
-    })
-  }
-
-  return res.status(200).json({
-    ok: true,
-    message: 'Course Deleted Successfully !'
-  })
-}
-
-export const getAllCourses = async (_, res) => {
   try {
-    const data = await Course.find()
-
-    if (!data) {
-      return res.status(500).json({
-        ok: false,
-        message: 'Failed to retrive course data !'
-      })
-    }
-
-    return res.status(200).json({
-      ok: true,
-      message: 'All course data fetched successfully !',
-      data
-    })
-  } catch (error) {
-    return res.status(500).json({
-      ok: false,
-      message: 'Failed to retrive course data !'
-    })
-  }
-}
-
-export const getCourseDetail = async (req, res) => {
-  try {
-    const courseId = req.body.id
+    const courseId = req.body.id || req.params.id;
 
     if (!courseId) {
       return res.status(400).json({
         ok: false,
-        message: 'Course Id request error !'
-      })
+        message: 'Course ID is required!'
+      });
     }
 
-    const courseDetail = await Course.findById(courseId)
+    const course = await Course.findByIdAndDelete(courseId);
 
-    if (!courseDetail) {
+    if (!course) {
+      return res.status(404).json({
+        ok: false,
+        message: 'Course not found!'
+      });
+    }
+
+    console.log(`✅ Course deleted: ${courseId}`);
+
+    return res.status(200).json({
+      ok: true,
+      message: 'Course deleted successfully!'
+    });
+  } catch (error) {
+    console.error('❌ Error deleting course:', error);
+    return res.status(500).json({
+      ok: false,
+      message: 'Failed to delete course!'
+    });
+  }
+};
+
+export const getAllCourses = async (_, res) => {
+  try {
+    const data = await Course.find().sort({ createdAt: -1 });
+
+    return res.status(200).json({
+      ok: true,
+      message: 'All courses fetched successfully!',
+      data
+    });
+  } catch (error) {
+    console.error('❌ Error fetching courses:', error);
+    return res.status(500).json({
+      ok: false,
+      message: 'Failed to fetch courses!'
+    });
+  }
+};
+
+export const getCourseDetail = async (req, res) => {
+  try {
+    const courseId = req.body.id || req.params.id;
+
+    if (!courseId) {
       return res.status(400).json({
         ok: false,
-        message: 'Course Details not found !'
-      })
+        message: 'Course ID is required!'
+      });
+    }
+
+    const courseDetail = await Course.findById(courseId);
+
+    if (!courseDetail) {
+      return res.status(404).json({
+        ok: false,
+        message: 'Course not found!'
+      });
     }
 
     return res.status(200).json({
       ok: true,
-      message: 'Course Details Fetched successfully !',
+      message: 'Course details fetched successfully!',
       data: courseDetail
-    })
+    });
   } catch (error) {
+    console.error('❌ Error fetching course detail:', error);
     return res.status(500).json({
       ok: false,
-      message: 'Invalid error !'
-    })
+      message: 'Failed to fetch course details!'
+    });
   }
-}
+};
 
-export const enrollCourse = async(req, res) =>{
+export const enrollCourse = async (req, res) => {
   try {
-    const { userId , courseId } = req.body
-  
-    if (!userId || !courseId) {
-      return res.status(400)
-      .json({
-        ok:false,
-        message:"Something went wrong Please try again !"
-      })
-    }
-  
+    const { userId, courseId } = req.body;
 
-    const user = await User.findById(userId)
+    if (!userId || !courseId) {
+      return res.status(400).json({
+        ok: false,
+        message: 'User ID and Course ID are required!'
+      });
+    }
+
+    const user = await User.findById(userId);
     if (!user) {
-      return res.status(400)
-      .json({
-        ok:false,
-        message:"User not found Please try again !"
-      })
+      return res.status(404).json({
+        ok: false,
+        message: 'User not found!'
+      });
     }
 
     const course = await Course.findById(courseId);
     if (!course) {
       return res.status(404).json({
         ok: false,
-        message: "Course not found!",
+        message: 'Course not found!'
       });
     }
 
     if (user.enrolledCourses.includes(courseId)) {
       return res.status(400).json({
         ok: false,
-        message: "User is already enrolled in this course!",
-        exist:true
+        message: 'You are already enrolled in this course!',
+        exist: true
       });
     }
-  
+
     user.enrolledCourses.push(courseId);
     await user.save();
-  
-    return res.status(200)
-      .json({
-        ok:true,
-        message:"Course enrolled successfully !",
-      })
+
+    console.log(`✅ User ${user.username} enrolled in course ${course.title}`);
+
+    return res.status(200).json({
+      ok: true,
+      message: 'Successfully enrolled in course!'
+    });
   } catch (error) {
-    return res.status(500)
-    .json({
-      ok:false,
-      message:"Internal Error while enrolling course !"
-    })
+    console.error('❌ Error enrolling course:', error);
+    return res.status(500).json({
+      ok: false,
+      message: 'Failed to enroll. Please try again!'
+    });
   }
-}
+};
 
-export const cancleEnroll = async(req, res) =>{
+export const cancelEnroll = async (req, res) => {
   try {
-    const { userId , courseId } = req.body
-  
-    if (!userId || !courseId) {
-      return res.status(400)
-      .json({
-        ok:false,
-        message:"Something went wrong Please try again !"
-      })
-    }
-  
+    const { userId, courseId } = req.body;
 
-    const user = await User.findById(userId)
+    if (!userId || !courseId) {
+      return res.status(400).json({
+        ok: false,
+        message: 'User ID and Course ID are required!'
+      });
+    }
+
+    const user = await User.findById(userId);
     if (!user) {
-      return res.status(400)
-      .json({
-        ok:false,
-        message:"User not found Please try again !"
-      })
+      return res.status(404).json({
+        ok: false,
+        message: 'User not found!'
+      });
     }
 
     const course = await Course.findById(courseId);
     if (!course) {
       return res.status(404).json({
         ok: false,
-        message: "Course not found!",
+        message: 'Course not found!'
       });
     }
 
     if (!user.enrolledCourses.includes(courseId)) {
       return res.status(400).json({
         ok: false,
-        message: "User isn't enrolled in this course!",
-        exist:true
+        message: "You aren't enrolled in this course!",
+        exist: true
       });
     }
-  
-    user.enrolledCourses.pop(courseId);
-    await user.save();
-  
-    return res.status(200)
-      .json({
-        ok:true,
-        message:"Course removed successfully !",
-      })
-  } catch (error) {
-    return res.status(500)
-    .json({
-      ok:false,
-      message:"Internal Error while cancling enrollment of course !"
-    })
-  }
-}
 
-export const checkEnrollment = async(req, res) =>{
+    user.enrolledCourses = user.enrolledCourses.filter(
+      id => id.toString() !== courseId
+    );
+    await user.save();
+
+    return res.status(200).json({
+      ok: true,
+      message: 'Course enrollment cancelled successfully!'
+    });
+  } catch (error) {
+    console.error('❌ Error cancelling enrollment:', error);
+    return res.status(500).json({
+      ok: false,
+      message: 'Failed to cancel enrollment!'
+    });
+  }
+};
+
+export const checkEnrollment = async (req, res) => {
   try {
-    const { userId , courseId } = req.body
-  
+    const { userId, courseId } = req.body;
+
     if (!userId || !courseId) {
-      return res.status(400)
-      .json({
-        ok:false,
-        message:"Something went wrong Please try again !"
-      })
+      return res.status(400).json({
+        ok: false,
+        message: 'User ID and Course ID are required!'
+      });
     }
-  
-    const user = await User.findById(userId)
+
+    const user = await User.findById(userId);
     if (!user) {
-      return res.status(400)
-      .json({
-        ok:false,
-        message:"User not found Please try again !"
-      })
+      return res.status(404).json({
+        ok: false,
+        message: 'User not found!'
+      });
     }
 
     const course = await Course.findById(courseId);
     if (!course) {
       return res.status(404).json({
         ok: false,
-        message: "Course not found!",
+        message: 'Course not found!'
       });
     }
 
-    if (user.enrolledCourses.includes(courseId)) {
-      return res.status(200).json({
-        isEnrolled: true,
-        message: "User is enrolled in this course!",
-      });
-    }else{
-      return res.status(200).json({
-        isEnrolled: false,
-        message: "User isn't enrolled in this course!",
-      });
-    }
+    const isEnrolled = user.enrolledCourses.includes(courseId);
 
+    return res.status(200).json({
+      isEnrolled,
+      message: isEnrolled ? 'User is enrolled' : 'User is not enrolled'
+    });
   } catch (error) {
-    return res.status(500)
-    .json({
-      ok:false,
-      message:"Internal Error while checking enrollment of course !"
-    })
+    console.error('❌ Error checking enrollment:', error);
+    return res.status(500).json({
+      ok: false,
+      message: 'Failed to check enrollment!'
+    });
   }
-}
+};
 
-export const getAllEnrollments = async(req, res) =>{
+export const getAllEnrollments = async (req, res) => {
   try {
-    const { userId } = req.body
-  
+    const { userId } = req.body;
+
     if (!userId) {
-      return res.status(400)
-        .json({
-          ok:false,
-          message:"Invalid Access !"
-        })
+      return res.status(400).json({
+        ok: false,
+        message: 'User ID is required!'
+      });
     }
-  
-    const enrollments = await User.findById(userId).populate("enrolledCourses")
-  
-    if (!enrollments) {
-      return res.status(500)
-        .json({
-          ok:false,
-          message:"Something went wrong while fetching enrolled Courses !"
-        })
+
+    const user = await User.findById(userId).populate('enrolledCourses');
+
+    if (!user) {
+      return res.status(404).json({
+        ok: false,
+        message: 'User not found!'
+      });
     }
-  
-      return res.status(200)
-        .json({
-          ok:true,
-          message:"Enrolled courses fetched successfully !",
-          data : enrollments.enrolledCourses
-        })
-  } catch (error) {   
-      return res.status(500)
-        .json({
-          ok:false,
-          message:"Internal Error !"
-        })
-    }
-}
+
+    return res.status(200).json({
+      ok: true,
+      message: 'Enrolled courses fetched successfully!',
+      data: user.enrolledCourses
+    });
+  } catch (error) {
+    console.error('❌ Error fetching enrollments:', error);
+    return res.status(500).json({
+      ok: false,
+      message: 'Failed to fetch enrolled courses!'
+    });
+  }
+};

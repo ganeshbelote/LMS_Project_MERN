@@ -15,7 +15,7 @@ const AdminDashboard = () => {
   })
 
   useEffect(() => {
-    if (!isAuthenticated || role !== 'admin') {
+    if (!isAuthenticated || role?.toLowerCase() !== 'admin') {
       navigate('/')
     }
     fetchStats()

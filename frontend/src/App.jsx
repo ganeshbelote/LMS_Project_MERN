@@ -12,6 +12,14 @@ import EnrolledCourses from './pages/EnrolledCourses.jsx'
 import Inbox from './pages/Inbox.jsx'
 import Task from './pages/Task.jsx'
 
+// ProtectedRoute component for admin-only routes
+const AdminRoute = ({ children }) => {
+  const { role, isAuthenticated } = useAuth()
+  if (!isAuthenticated) return <Navigate to="/login" replace />
+  if (role?.toLowerCase() !== 'admin') return <Navigate to="/" replace />
+  return children
+}
+
 function App () {
   const { isAuthenticated, loading } = useAuth()
 

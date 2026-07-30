@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
@@ -8,9 +8,17 @@ const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const { isAuthenticated, user, logout } = useAuth()
   const navigate = useNavigate()
+  const menuBtnRef = useRef(null)
 
   const handleMenuToggle = state => {
     setIsMenuOpen(state)
+  }
+
+  const closeMenu = () => {
+    setIsMenuOpen(false)
+    if (menuBtnRef.current) {
+      menuBtnRef.current.close()
+    }
   }
 
   const handleLogout = () => {
@@ -31,7 +39,6 @@ const Navbar = () => {
     <header className='w-full max-w-4xl bg-gray-100 p-4 flex justify-between items-center relative'>
       <Link to="/" className='text-2xl font-bold text-blue-600'>!Course</Link>
       <div className='flex items-center gap-3'>
-        {/* User info (desktop) */}
         {isAuthenticated && user && (
           <div className='hidden lg:flex items-center gap-2 bg-white rounded-full px-4 py-1.5 shadow-sm'>
             <div className='w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold'>
@@ -40,11 +47,9 @@ const Navbar = () => {
             <span className='text-sm font-medium text-gray-700'>{user?.username || 'User'}</span>
           </div>
         )}
-        {/* Menu Button for Mobile */}
         <div className='lg:hidden'>
-          <MenuBtn onToggle={handleMenuToggle} />
+          <MenuBtn ref={menuBtnRef} onToggle={handleMenuToggle} />
         </div>
-        {/* Desktop Search and Auth */}
         <div className='hidden lg:flex items-center space-x-3'>
           <input
             type='text'
@@ -66,7 +71,6 @@ const Navbar = () => {
           )}
         </div>
       </div>
-      {/* Mobile Menu */}
       <AnimatePresence>
         {isMenuOpen && (
           <motion.div
@@ -81,22 +85,22 @@ const Navbar = () => {
                 key={option.label}
                 to={option.path}
                 className='block p-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded transition-colors'
-                onClick={() => setIsMenuOpen(false)}
+                onClick={closeMenu}
               >
                 {option.label}
               </Link>
             ))}
             {isAuthenticated ? (
               <button
-                onClick={() => { handleLogout(); setIsMenuOpen(false); }}
+                onClick={() => { handleLogout(); closeMenu(); }}
                 className='w-full mt-2 bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 text-sm font-medium'
               >
                 Logout
               </button>
             ) : (
               <div className='flex space-x-2 mt-2'>
-                <Link to='/login' className='flex-1 text-center bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 text-sm font-medium' onClick={() => setIsMenuOpen(false)}>Login</Link>
-                <Link to='/register' className='flex-1 text-center bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 text-sm font-medium' onClick={() => setIsMenuOpen(false)}>Register</Link>
+                <Link to='/login' className='flex-1 text-center bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 text-sm font-medium' onClick={closeMenu}>Login</Link>
+                <Link to='/register' className='flex-1 text-center bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 text-sm font-medium' onClick={closeMenu}>Register</Link>
               </div>
             )}
           </motion.div>

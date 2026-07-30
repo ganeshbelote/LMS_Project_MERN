@@ -7,6 +7,8 @@ import { connectDB } from './database/db.js'
 
 import auth from './routes/auth.route.js'
 import course from './routes/course.route.js'
+import notification from './routes/notification.route.js'
+import task from './routes/task.route.js'
 
 dotenv.config()
 const app = express()
@@ -26,6 +28,8 @@ const limiter = rateLimit({
 
 app.use('/api/v1/auth', limiter, auth)
 app.use('/api/v1/courses', limiter, course)
+app.use('/api/v1/notifications', limiter, notification)
+app.use('/api/v1/tasks', limiter, task)
 
 app.listen(PORT, () => {
   console.log(`Server is started on ${PORT}`)

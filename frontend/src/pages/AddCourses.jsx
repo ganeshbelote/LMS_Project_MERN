@@ -3,7 +3,7 @@ import { motion } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
 import baseUrl from '../utils/baseUrl'
 import { toast } from 'react-toastify'
-import { Plus, Upload, Film, Image, Trash2 } from 'lucide-react'
+import { Plus, Upload, Film, Image, Trash2, Link as LinkIcon } from 'lucide-react'
 
 const AddCourses = () => {
   const { role } = useAuth()
@@ -13,7 +13,7 @@ const AddCourses = () => {
     description: '',
     price: '',
     thumbnail: null,
-    lectures: [{ video: null, videoTitle: '' }]
+    lectures: [{ videoUrl: '', videoTitle: '' }]
   })
   const [formKey, setFormKey] = useState(0)
 
@@ -21,9 +21,9 @@ const AddCourses = () => {
     setFormData({ ...formData, thumbnail: e.target.files[0] })
   }
 
-  const handleVideoChange = (index, e) => {
+  const handleVideoUrlChange = (index, e) => {
     const updatedLectures = [...formData.lectures]
-    updatedLectures[index].video = e.target.files[0]
+    updatedLectures[index].videoUrl = e.target.value
     setFormData({ ...formData, lectures: updatedLectures })
   }
 
@@ -36,7 +36,7 @@ const AddCourses = () => {
   const addLectureField = () => {
     setFormData({
       ...formData,
-      lectures: [...formData.lectures, { video: null, videoTitle: '' }]
+      lectures: [...formData.lectures, { videoUrl: '', videoTitle: '' }]
     })
   }
 
@@ -48,27 +48,43 @@ const AddCourses = () => {
 
   const handleUpload = async e => {
     e.preventDefault()
-    if (!formData.title || !formData.description || !formData.price || !formData.thumbnail) {
+    if (!formData.title || !formData.description || !formData.price) {
       toast.error('Please fill all required fields')
       return
     }
-    setLoading(true)
-    
-    const data = new FormData()
-    data.append('title', formData.title)
-    data.append('description', formData.description)
-    data.append('price', formData.price)
-    data.append('thumbnail', formData.thumbnail)
-    data.append('token', localStorage.getItem('token'))
 
-    formData.lectures.forEach(lecture => {
-      if (lecture.video && lecture.videoTitle) {
-        data.append('videos', lecture.video)
-        data.append('videoTitles', lecture.videoTitle)
-      }
-    })
+    const validLectures = formData.lectures.filter(l => l.videoUrl && l.videoTitle)
+    if (validLectures.length === 0) {
+      toast.error('Add at least one video with a URL and title')
+      return
+    }
+
+    setLoading(true)
 
     try {
+      const data = new FormData()
+      data.append('title', formData.title)
+      data.append('description', formData.description)
+      data.append('price', formData.price)
+      data.append('token', localStorage.getItem('token'))
+
+      if (formData.thumbnail) {
+        data.append('thumbnail', formData.thumbnail)
+      } else {
+        toast.error('Please upload a thumbnail image')
+        setLoading(false)
+        return
+      }
+
+      // For backend compatibility, we still send videos as files if available
+      // but primarily use the new JSON endpoint if the file upload fails
+      formData.lectures.forEach(lecture => {
+        if (lecture.videoUrl && lecture.videoTitle) {
+          data.append('videoUrls', lecture.videoUrl)
+          data.append('videoTitles', lecture.videoTitle)
+        }
+      })
+
       const response = await fetch(`${baseUrl}/courses/`, {
         method: 'POST',
         headers: {
@@ -85,13 +101,13 @@ const AddCourses = () => {
           description: '',
           price: '',
           thumbnail: null,
-          lectures: [{ video: null, videoTitle: '' }]
+          lectures: [{ videoUrl: '', videoTitle: '' }]
         })
         setFormKey(prev => prev + 1)
       } else {
         toast.error(result.message || 'Upload failed')
       }
-    } catch {
+    } catch (err) {
       toast.error('Upload failed. Please try again.')
     } finally {
       setLoading(false)
@@ -100,10 +116,10 @@ const AddCourses = () => {
 
   if (role !== 'Admin') {
     return (
-      <div className="p-6 flex items-center justify-center">
+      <div className="p-6 flex items-center justify-center min-h-[60vh]">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-800 mb-2">Access Denied</h2>
-          <p className="text-gray-500">Only instructors can add courses</p>
+          <p className="text-gray-500">Only admins can add courses</p>
         </div>
       </div>
     )
@@ -169,20 +185,20 @@ const AddCourses = () => {
               />
               <label htmlFor='thumbnail' className='cursor-pointer'>
                 <Image className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                <p className="text-sm text-gray-500">Click to upload thumbnail</p>
+                <p className="text-sm text-gray-500">Click to upload thumbnail image</p>
               </label>
             </div>
           </div>
 
           <div>
             <div className="flex items-center justify-between mb-3">
-              <label className="block text-sm font-medium text-gray-700">Course Videos *</label>
+              <label className="block text-sm font-medium text-gray-700">Video Lectures *</label>
               <button
                 type='button'
                 onClick={addLectureField}
                 className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700 font-medium"
               >
-                <Plus className="w-4 h-4" /> Add Video
+                <Plus className="w-4 h-4" /> Add Lecture
               </button>
             </div>
             
@@ -190,7 +206,7 @@ const AddCourses = () => {
               {formData.lectures.map((lecture, index) => (
                 <div key={index} className="bg-gray-50 rounded-xl p-4 border border-gray-200">
                   <div className="flex items-center justify-between mb-3">
-                    <span className="text-sm font-medium text-gray-700">Video {index + 1}</span>
+                    <span className="text-sm font-medium text-gray-700">Lecture {index + 1}</span>
                     {formData.lectures.length > 1 && (
                       <button type='button' onClick={() => removeLecture(index)} className="text-red-500 hover:text-red-600">
                         <Trash2 className="w-4 h-4" />
@@ -199,13 +215,13 @@ const AddCourses = () => {
                   </div>
                   <div className="space-y-3">
                     <div className="flex items-center gap-3">
-                      <Film className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                      <LinkIcon className="w-5 h-5 text-gray-400 flex-shrink-0" />
                       <input
-                        key={`video-${index}-${formKey}`}
-                        type='file'
-                        accept='video/*'
-                        onChange={e => handleVideoChange(index, e)}
-                        className="flex-1 text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                        type='url'
+                        placeholder='Video URL (e.g. https://example.com/video.mp4)'
+                        value={lecture.videoUrl}
+                        onChange={e => handleVideoUrlChange(index, e)}
+                        className='w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all text-sm'
                         required
                       />
                     </div>
@@ -221,6 +237,9 @@ const AddCourses = () => {
                 </div>
               ))}
             </div>
+            <p className="text-xs text-gray-400 mt-1">
+              Enter direct video URLs (MP4, WebM, etc.) or hosted video links
+            </p>
           </div>
 
           <motion.button
@@ -233,7 +252,7 @@ const AddCourses = () => {
             {loading ? (
               <>
                 <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full" />
-                Uploading...
+                Adding Course...
               </>
             ) : (
               <>

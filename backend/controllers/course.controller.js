@@ -129,6 +129,83 @@ export const addCourse = async (req, res) => {
   }
 };
 
+export const updateCourse = async (req, res) => {
+  try {
+    const courseId = req.params.id || req.body.id;
+    const { title, description, price, videoUrls, videoTitles } = req.body;
+
+    if (!courseId) {
+      return res.status(400).json({
+        ok: false,
+        message: 'Course ID is required!'
+      });
+    }
+
+    const existingCourse = await Course.findById(courseId);
+    if (!existingCourse) {
+      return res.status(404).json({
+        ok: false,
+        message: 'Course not found!'
+      });
+    }
+
+    // Update fields if provided
+    if (title) existingCourse.title = title;
+    if (description) existingCourse.description = description;
+    if (price) existingCourse.price = Number(price);
+
+    // Handle thumbnail update
+    if (req.files && req.files.thumbnail) {
+      try {
+        const thumbnailUpload = await cloudinary.uploader.upload(
+          req.files.thumbnail[0].path,
+          { folder: 'courses/thumbnails', resource_type: 'image' }
+        );
+        existingCourse.thumbnail = thumbnailUpload.secure_url;
+      } catch (uploadErr) {
+        console.error('Thumbnail upload error:', uploadErr);
+        return res.status(500).json({
+          ok: false,
+          message: 'Failed to upload thumbnail image!',
+          error: uploadErr.message
+        });
+      }
+    }
+
+    // Handle video URLs update
+    if (videoUrls) {
+      const urlArr = Array.isArray(videoUrls) ? videoUrls : [videoUrls];
+      const titleArr = videoTitles
+        ? (Array.isArray(videoTitles) ? videoTitles : [videoTitles])
+        : [];
+
+      existingCourse.videos = urlArr.map((url, index) => ({
+        title: titleArr[index] || `Lecture ${index + 1}`,
+        url: url,
+        public_id: url
+      }));
+    }
+
+    await existingCourse.save();
+
+    console.log(`✅ Course updated: ${existingCourse.title} (${existingCourse._id})`);
+
+    return res.status(200).json({
+      ok: true,
+      message: 'Course updated successfully!',
+      course: existingCourse
+    });
+  } catch (error) {
+    console.error('❌ Error in updateCourse:', error);
+    console.error('Stack:', error.stack);
+    return res.status(500).json({
+      ok: false,
+      message: 'Failed to update course. Please try again.',
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+    });
+  }
+};
+
 export const deleteCourse = async (req, res) => {
   try {
     const courseId = req.body.id || req.params.id;

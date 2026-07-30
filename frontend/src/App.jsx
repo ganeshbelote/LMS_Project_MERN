@@ -2,6 +2,7 @@ import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom'
 import { useAuth } from './context/AuthContext'
 import Dashboard from './pages/Dashboard.jsx'
 import AddCourses from './pages/AddCourses.jsx'
+import EditCourse from './pages/EditCourse.jsx'
 import CourseDetail from './pages/CourseDetail.jsx'
 import Profile from './pages/Profile.jsx'
 import NotFound from './pages/NotFound.jsx'
@@ -50,6 +51,7 @@ function App () {
         { path: 'inbox', element: <Inbox /> },
         { path: 'task', element: <Task /> },
         { path: 'add-courses', element: <AddCourses /> },
+        { path: 'edit-course/:courseId', element: <AdminRoute><EditCourse /></AdminRoute> },
       ]
     },
     {

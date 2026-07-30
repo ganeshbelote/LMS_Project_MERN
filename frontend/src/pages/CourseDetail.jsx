@@ -4,13 +4,13 @@ import { motion } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
 import api from '../utils/api'
 import { toast } from 'react-toastify'
-import { Bell, Clock, Users, Award, PlayCircle, CheckCircle, Lock, ArrowLeft, BookOpen, ExternalLink } from 'lucide-react'
+import { Bell, Clock, Users, Award, PlayCircle, CheckCircle, Lock, ArrowLeft, BookOpen, ExternalLink, Edit3 } from 'lucide-react'
 import VideoPlayer from '../components/Shared/VideoPlayer'
 
 const CourseDetail = () => {
   const { courseId } = useParams()
   const navigate = useNavigate()
-  const { user, isAuthenticated } = useAuth()
+  const { user, isAuthenticated, role } = useAuth()
   const [course, setCourse] = useState(null)
   const [loading, setLoading] = useState(true)
   const [isEnrolled, setIsEnrolled] = useState(false)
@@ -59,18 +59,26 @@ const CourseDetail = () => {
     }
     setEnrolling(true)
     try {
+      // Use _id, id, or localStorage fallback to handle different user object formats
+      const userId = user?._id || user?.id || localStorage.getItem('id')
+      if (!userId) {
+        toast.error('User not found. Please login again.')
+        setEnrolling(false)
+        return
+      }
       const res = await api.post('/courses/enrollCourse', {
-        userId: user._id,
+        userId,
         courseId
       })
       if (res.data.ok) {
         setIsEnrolled(true)
         toast.success('Successfully enrolled! 🎉')
       } else {
-        toast.error(res.data.message)
+        toast.error(res.data.message || 'Enrollment failed')
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Enrollment failed')
+      console.error('❌ Enrollment error:', err)
+      toast.error(err.response?.data?.message || 'Enrollment failed. Please try again.')
     } finally {
       setEnrolling(false)
     }
@@ -372,6 +380,24 @@ const CourseDetail = () => {
                 </div>
               )}
             </motion.div>
+
+            {/* Admin Actions - Edit Course */}
+            {role?.toLowerCase() === 'admin' && (
+              <motion.div
+                initial={{ opacity: 0, x: 30 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.2 }}
+                className="bg-white rounded-2xl shadow-xl p-6 border-t-4 border-blue-500"
+              >
+                <h3 className="text-lg font-bold text-gray-800 mb-4">Admin Actions</h3>
+                <button
+                  onClick={() => navigate(`/edit-course/${courseId}`)}
+                  className="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold hover:bg-blue-700 transition flex items-center justify-center gap-2"
+                >
+                  <Edit3 className="w-5 h-5" /> Edit Course
+                </button>
+              </motion.div>
+            )}
           </div>
         </div>
       </div>

@@ -1,5 +1,5 @@
 import express from "express";
-import { addCourse, cancelEnroll, checkEnrollment, deleteCourse, enrollCourse, getAllEnrollments, getCourseDetail } from "../controllers/course.controller.js";
+import { addCourse, cancelEnroll, checkEnrollment, deleteCourse, enrollCourse, getAllEnrollments, getCourseDetail, updateCourse } from "../controllers/course.controller.js";
 import { getAllCourses } from "../controllers/course.controller.js";
 import { ensureAuth } from '../middlewares/ensureAuth.js';
 import { upload } from '../middlewares/multer.js';
@@ -34,6 +34,24 @@ router.route("/").post(
     { name: "videos", maxCount: 5 }
   ]),
   addCourse
+);
+
+router.route('/updateCourse/:id').put(
+  ensureAuth,
+  (req, res, next) => {
+    if (req.user?.role?.toLowerCase() !== 'admin') {
+      return res.status(403).json({
+        ok: false,
+        message: 'Access denied! Only admins can update courses.'
+      });
+    }
+    next();
+  },
+  upload.fields([
+    { name: "thumbnail", maxCount: 1 },
+    { name: "videos", maxCount: 5 }
+  ]),
+  updateCourse
 );
 
 router.route('/deleteCourse').delete(ensureAuth, (req, res, next) => {

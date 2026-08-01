@@ -3,17 +3,28 @@ import { motion } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
 import api from '../utils/api'
 import { toast } from 'react-toastify'
-import { User, Mail, BookOpen, Award, Calendar, Shield, Save, X, Camera } from 'lucide-react'
+import { User, Mail, BookOpen, Award, Calendar, Shield, Save, X, Camera, PlusCircle, Edit3, List, Users, TrendingUp, DollarSign, Trash2, ExternalLink } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 
 const Profile = () => {
-  const { user, fetchUserData } = useAuth()
+  const { user, fetchUserData, role } = useAuth()
+  const navigate = useNavigate()
   const [isEditing, setIsEditing] = useState(false)
   const [loading, setLoading] = useState(false)
   const [enrolledCourses, setEnrolledCourses] = useState([])
+  const [allCourses, setAllCourses] = useState([])
+  const [stats, setStats] = useState({
+    totalCourses: 0,
+    totalUsers: 0,
+    totalEnrollments: 0,
+    revenue: 0
+  })
   const [formData, setFormData] = useState({
     username: '',
     email: '',
   })
+
+  const isAdmin = role?.toLowerCase() === 'admin'
 
   useEffect(() => {
     if (user) {
@@ -23,7 +34,11 @@ const Profile = () => {
       })
     }
     fetchEnrolledCourses()
-  }, [user])
+    if (isAdmin) {
+      fetchAllCourses()
+      fetchStats()
+    }
+  }, [user, isAdmin])
 
   const fetchEnrolledCourses = async () => {
     try {
@@ -32,6 +47,28 @@ const Profile = () => {
       })
       if (res.data.ok) {
         setEnrolledCourses(res.data.data)
+      }
+    } catch {
+      // silently fail
+    }
+  }
+
+  const fetchAllCourses = async () => {
+    try {
+      const res = await api.get('/courses/')
+      if (res.data.ok) {
+        setAllCourses(res.data.data)
+      }
+    } catch {
+      // silently fail
+    }
+  }
+
+  const fetchStats = async () => {
+    try {
+      const coursesRes = await api.get('/courses/')
+      if (coursesRes.data.ok) {
+        setStats(prev => ({ ...prev, totalCourses: coursesRes.data.data.length }))
       }
     } catch {
       // silently fail
@@ -52,6 +89,21 @@ const Profile = () => {
       toast.error('Failed to update profile')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleDeleteCourse = async (courseId) => {
+    if (!window.confirm('Are you sure you want to delete this course?')) return
+    try {
+      const res = await api.delete('/courses/deleteCourse', { data: { id: courseId } })
+      if (res.data.ok) {
+        toast.success('Course deleted successfully!')
+        fetchAllCourses()
+      } else {
+        toast.error(res.data.message)
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to delete course')
     }
   }
 
@@ -176,6 +228,118 @@ const Profile = () => {
               </div>
             )}
           </section>
+
+          {/* Admin Panel Section - Only for admins */}
+          {isAdmin && (
+            <section className="mb-8">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                  <Shield className="w-5 h-5 text-blue-600" /> Admin Panel
+                </h3>
+              </div>
+
+              {/* Admin Stats */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+                <div className="bg-blue-50 rounded-xl p-4 text-center">
+                  <BookOpen className="w-6 h-6 text-blue-600 mx-auto mb-1" />
+                  <p className="text-2xl font-bold text-gray-800">{stats.totalCourses}</p>
+                  <p className="text-xs text-gray-500">Total Courses</p>
+                </div>
+                <div className="bg-green-50 rounded-xl p-4 text-center">
+                  <Users className="w-6 h-6 text-green-600 mx-auto mb-1" />
+                  <p className="text-2xl font-bold text-gray-800">{stats.totalUsers}</p>
+                  <p className="text-xs text-gray-500">Total Users</p>
+                </div>
+                <div className="bg-purple-50 rounded-xl p-4 text-center">
+                  <TrendingUp className="w-6 h-6 text-purple-600 mx-auto mb-1" />
+                  <p className="text-2xl font-bold text-gray-800">{stats.totalEnrollments}</p>
+                  <p className="text-xs text-gray-500">Enrollments</p>
+                </div>
+                <div className="bg-orange-50 rounded-xl p-4 text-center">
+                  <DollarSign className="w-6 h-6 text-orange-600 mx-auto mb-1" />
+                  <p className="text-2xl font-bold text-gray-800">₹{stats.revenue}</p>
+                  <p className="text-xs text-gray-500">Revenue</p>
+                </div>
+              </div>
+
+              {/* Admin Quick Actions */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+                <button
+                  onClick={() => navigate('/add-courses')}
+                  className="flex items-center gap-3 bg-blue-600 text-white p-4 rounded-xl hover:bg-blue-700 transition"
+                >
+                  <PlusCircle className="w-6 h-6 flex-shrink-0" />
+                  <div className="text-left">
+                    <p className="font-semibold">Add New Course</p>
+                    <p className="text-xs text-blue-200">Create a new course</p>
+                  </div>
+                </button>
+                <button
+                  onClick={() => navigate('/')}
+                  className="flex items-center gap-3 bg-green-600 text-white p-4 rounded-xl hover:bg-green-700 transition"
+                >
+                  <List className="w-6 h-6 flex-shrink-0" />
+                  <div className="text-left">
+                    <p className="font-semibold">Manage Courses</p>
+                    <p className="text-xs text-green-200">View and edit all courses</p>
+                  </div>
+                </button>
+              </div>
+
+              {/* Course List */}
+              <div className="bg-gray-50 rounded-xl p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="font-semibold text-gray-800 flex items-center gap-2">
+                    <List className="w-4 h-4 text-blue-600" /> All Courses ({allCourses.length})
+                  </h4>
+                </div>
+                {allCourses.length === 0 ? (
+                  <p className="text-gray-500 text-center py-4">No courses added yet</p>
+                ) : (
+                  <div className="space-y-2 max-h-64 overflow-y-auto">
+                    {allCourses.map((course) => (
+                      <div key={course._id} className="bg-white rounded-lg p-3 flex items-center gap-3 border border-gray-200">
+                        <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                          {course.thumbnail ? (
+                            <img src={course.thumbnail} alt={course.title} className="w-full h-full object-cover" />
+                          ) : (
+                            <BookOpen className="w-5 h-5 text-blue-600" />
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-gray-800 truncate text-sm">{course.title}</p>
+                          <p className="text-xs text-gray-500">₹{course.price} • {course.videos?.length || 0} videos</p>
+                        </div>
+                        <div className="flex gap-1 flex-shrink-0">
+                          <button
+                            onClick={() => navigate(`/edit-course/${course._id}`)}
+                            className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
+                            title="Edit course"
+                          >
+                            <Edit3 className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => navigate(`/course/${course._id}`)}
+                            className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition"
+                            title="View course"
+                          >
+                            <ExternalLink className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteCourse(course._id)}
+                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
+                            title="Delete course"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </section>
+          )}
 
           {/* Enrolled Courses */}
           <section className="mb-8">

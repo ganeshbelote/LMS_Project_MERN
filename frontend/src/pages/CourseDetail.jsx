@@ -18,6 +18,7 @@ const CourseDetail = () => {
   const [activeTab, setActiveTab] = useState('overview')
   const [error, setError] = useState(null)
   const [selectedVideo, setSelectedVideo] = useState(null)
+  const [watchedVideos, setWatchedVideos] = useState([])
 
   useEffect(() => {
     const fetchCourse = async () => {
@@ -88,6 +89,24 @@ const CourseDetail = () => {
     setSelectedVideo(video)
   }
 
+  // Mark video as watched when it ends
+  const handleVideoEnded = () => {
+    if (selectedVideo?.url) {
+      setWatchedVideos(prev => {
+        if (!prev.includes(selectedVideo.url)) {
+          return [...prev, selectedVideo.url]
+        }
+        return prev
+      })
+    }
+  }
+
+  // Calculate progress based on watched videos
+  const totalVideos = course?.videos?.length || 0
+  const progress = isEnrolled && totalVideos > 0
+    ? Math.round((watchedVideos.length / totalVideos) * 100)
+    : 0
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -110,8 +129,6 @@ const CourseDetail = () => {
       </div>
     )
   }
-
-  const progress = isEnrolled ? 60 : 0
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -140,7 +157,6 @@ const CourseDetail = () => {
             >
               {course.title}
             </motion.h1>
-            <p className="text-white/80 text-lg mb-4 max-w-2xl">{course.description}</p>
             <div className="flex flex-wrap items-center gap-4 md:gap-6 text-sm md:text-base">
               <span className="flex items-center gap-1.5">
                 <Award className="w-4 h-4 text-yellow-400" /> 4.8
@@ -168,11 +184,12 @@ const CourseDetail = () => {
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-white rounded-2xl shadow-xl overflow-hidden"
+                className="mt-12 bg-white rounded-2xl shadow-xl overflow-hidden"
               >
                 <VideoPlayer 
                   videoUrl={selectedVideo.url} 
                   videoTitle={selectedVideo.title}
+                  onEnded={handleVideoEnded}
                 />
               </motion.div>
             )}
@@ -231,7 +248,9 @@ const CourseDetail = () => {
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
+                  onClick={() => navigate('/inbox')}
                   className="p-3 md:p-4 bg-white border-2 border-blue-600 rounded-xl shadow-lg hover:bg-blue-50 transition"
+                  title="Notifications"
                 >
                   <Bell className="w-5 h-5 md:w-6 md:h-6 text-blue-600" />
                 </motion.button>
@@ -278,7 +297,9 @@ const CourseDetail = () => {
                   {!course.videos || course.videos.length === 0 ? (
                     <p className="text-gray-500 text-center py-8">No videos available yet</p>
                   ) : (
-                    course.videos.map((video, index) => (
+                    course.videos.map((video, index) => {
+                      const isWatched = watchedVideos.includes(video.url)
+                      return (
                       <motion.div
                         key={index}
                         whileHover={{ x: 3 }}
@@ -296,11 +317,15 @@ const CourseDetail = () => {
                             <div className={`w-8 h-8 md:w-10 md:h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
                               selectedVideo?.url === video.url 
                                 ? 'bg-blue-600 text-white' 
-                                : isEnrolled 
-                                  ? 'bg-green-100 text-green-600'
-                                  : 'bg-gray-200 text-gray-400'
+                                : isWatched
+                                  ? 'bg-green-500 text-white'
+                                  : isEnrolled 
+                                    ? 'bg-green-100 text-green-600'
+                                    : 'bg-gray-200 text-gray-400'
                             }`}>
-                              {isEnrolled ? (
+                              {isWatched ? (
+                                <CheckCircle className="w-5 h-5" />
+                              ) : isEnrolled ? (
                                 <PlayCircle className="w-5 h-5" />
                               ) : (
                                 <Lock className="w-5 h-5" />
@@ -311,17 +336,23 @@ const CourseDetail = () => {
                                 {video.title || `Lecture ${index + 1}`}
                               </h4>
                               <p className="text-xs text-gray-500">
-                                {index === 0 ? 'Getting started' : `Chapter ${index + 1}`}
+                                {isWatched ? 'Completed' : index === 0 ? 'Getting started' : `Chapter ${index + 1}`}
                               </p>
                             </div>
                           </div>
                           {!isEnrolled && <Lock className="w-4 h-4 text-gray-400 flex-shrink-0" />}
-                          {isEnrolled && (
+                          {isEnrolled && isWatched && (
+                            <span className="text-xs text-green-600 font-medium flex items-center gap-1">
+                              <CheckCircle className="w-4 h-4" /> Watched
+                            </span>
+                          )}
+                          {isEnrolled && !isWatched && (
                             <ExternalLink className="w-4 h-4 text-blue-500 flex-shrink-0" />
                           )}
                         </div>
                       </motion.div>
-                    ))
+                      )
+                    })
                   )}
                 </div>
               )}

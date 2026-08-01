@@ -1,10 +1,10 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import api from '../utils/api'
-import ReactPlayer from 'react-player'
-import { BookOpen, PlayCircle, X, ChevronRight, Clock, Film } from 'lucide-react'
+import VideoPlayer from '../components/Shared/VideoPlayer'
+import { BookOpen, PlayCircle, X, ChevronRight, Clock, Film, ListVideo } from 'lucide-react'
 
 const EnrolledCourses = () => {
   const { user } = useAuth()
@@ -13,7 +13,6 @@ const EnrolledCourses = () => {
   const [loading, setLoading] = useState(true)
   const [selectedCourse, setSelectedCourse] = useState(null)
   const [currentIndex, setCurrentIndex] = useState(0)
-  const playerRef = useRef(null)
 
   useEffect(() => {
     fetchEnrollments()
@@ -129,48 +128,51 @@ const EnrolledCourses = () => {
 
       {/* Video Player Modal */}
       {selectedCourse && (
-        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
-          <div className="bg-gray-900 rounded-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col">
+        <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-2 md:p-4">
+          <div className="bg-gray-900 rounded-2xl w-full max-w-6xl h-[95vh] md:h-[90vh] overflow-hidden flex flex-col">
             {/* Header */}
-            <div className="flex items-center justify-between p-4 border-b border-gray-700">
-              <h3 className="text-white font-semibold truncate pr-4">
-                {selectedCourse.title} - {selectedCourse.videos?.[currentIndex]?.title || 'Video'}
-              </h3>
+            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-700 flex-shrink-0">
+              <div className="min-w-0">
+                <h3 className="text-white font-semibold truncate">
+                  {selectedCourse.title}
+                </h3>
+                <p className="text-gray-400 text-xs truncate">
+                  {selectedCourse.videos?.[currentIndex]?.title || 'Video'} • {currentIndex + 1}/{selectedCourse.videos?.length || 0}
+                </p>
+              </div>
               <button
                 onClick={() => setSelectedCourse(null)}
-                className="text-gray-400 hover:text-white p-1 rounded-full hover:bg-gray-700 transition"
+                className="text-gray-400 hover:text-white p-1.5 rounded-full hover:bg-gray-700 transition flex-shrink-0"
               >
                 <X className="w-6 h-6" />
               </button>
             </div>
 
-            {/* Content */}
-            <div className="flex flex-col lg:flex-row flex-1 overflow-hidden">
-              {/* Video Player */}
-              <div className="flex-1 bg-black flex items-center justify-center p-4">
-                {selectedCourse.videos?.[currentIndex]?.url ? (
-                  <ReactPlayer
-                    ref={playerRef}
-                    url={selectedCourse.videos[currentIndex].url}
-                    controls
-                    width="100%"
-                    height="100%"
-                    playing={true}
-                    onEnded={handleEnded}
-                    style={{ maxHeight: '60vh' }}
-                  />
-                ) : (
-                  <div className="text-center text-gray-500">
-                    <PlayCircle className="w-16 h-16 mx-auto mb-2" />
-                    <p>No video available</p>
-                  </div>
-                )}
+            {/* Content - flex row on desktop, column on mobile */}
+            <div className="flex flex-col lg:flex-row flex-1 overflow-hidden min-h-0">
+              {/* Video Player - maintains 16:9 aspect ratio, centered */}
+              <div className="flex-1 bg-black flex items-center justify-center p-2 md:p-4 min-h-0 overflow-hidden">
+                <div className="w-full max-w-4xl mx-auto" style={{ aspectRatio: '16/9', maxHeight: '100%' }}>
+                  {selectedCourse.videos?.[currentIndex]?.url ? (
+                    <VideoPlayer
+                      videoUrl={selectedCourse.videos[currentIndex].url}
+                      videoTitle={selectedCourse.videos[currentIndex].title}
+                      onEnded={handleEnded}
+                    />
+                  ) : (
+                    <div className="h-full flex flex-col items-center justify-center text-gray-500">
+                      <PlayCircle className="w-16 h-16 mx-auto mb-2" />
+                      <p>No video available</p>
+                    </div>
+                  )}
+                </div>
               </div>
 
-              {/* Playlist */}
+              {/* Playlist - fixed width on desktop, bottom on mobile */}
               {selectedCourse.videos?.length > 0 && (
-                <div className="w-full lg:w-72 bg-gray-800 overflow-y-auto max-h-60 lg:max-h-full">
-                  <div className="p-3 border-b border-gray-700">
+                <div className="w-full lg:w-80 bg-gray-800 overflow-y-auto flex-shrink-0 lg:h-full max-h-40 lg:max-h-full">
+                  <div className="p-3 border-b border-gray-700 flex items-center gap-2">
+                    <ListVideo className="w-4 h-4 text-gray-400" />
                     <p className="text-sm text-gray-400 font-medium">Course Content</p>
                   </div>
                   <div className="p-2 space-y-1">

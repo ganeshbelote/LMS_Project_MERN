@@ -48,18 +48,13 @@ const Navbar = () => {
             <div className='w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold'>
               {user?.username?.[0]?.toUpperCase() || 'U'}
             </div>
-            <span className='text-sm font-medium text-gray-700'>{user?.username || 'User'}</span>
+            <span className='text-sm font-medium text-gray-700' onClick={()=> navigate("/profile")}>{user?.username || 'User'}</span>
           </div>
         )}
         <div className='lg:hidden'>
           <MenuBtn ref={menuBtnRef} onToggle={handleMenuToggle} />
         </div>
         <div className='hidden lg:flex items-center space-x-3'>
-          <input
-            type='text'
-            placeholder='Search your course...'
-            className='w-64 rounded-lg border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 py-2 px-4 outline-none'
-          />
           {isAuthenticated ? (
             <button
               onClick={handleLogout}

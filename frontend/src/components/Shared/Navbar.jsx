@@ -34,9 +34,10 @@ const Navbar = () => {
     { label: 'Tasks', path: '/task' },
   ]
 
-  // Add "Add Course" for admin users in mobile menu
+  // Add admin-only options for admin users in mobile menu
   if (role?.toLowerCase() === 'admin') {
     lmsOptions.push({ label: 'Add Course', path: '/add-courses' })
+    lmsOptions.push({ label: 'Analytics', path: '/admin-analytics' })
   }
 
   return (

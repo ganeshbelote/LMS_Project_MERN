@@ -1,6 +1,6 @@
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
-import { LayoutDashboard, BookOpen, Users, Inbox, CheckSquare, Settings, LogOut, PlusCircle } from 'lucide-react'
+import { LayoutDashboard, BookOpen, Users, Inbox, CheckSquare, Settings, LogOut, PlusCircle, BarChart3 } from 'lucide-react'
 
 const Sidebar = () => {
   const { role, logout } = useAuth()
@@ -20,6 +20,7 @@ const Sidebar = () => {
 
   if (role === 'admin') {
     navItems.push({ label: 'Add Course', path: '/add-courses', icon: PlusCircle })
+    navItems.push({ label: 'Analytics', path: '/admin-analytics', icon: BarChart3 })
   }
 
   return (

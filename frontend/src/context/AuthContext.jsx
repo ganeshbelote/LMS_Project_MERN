@@ -34,6 +34,9 @@ export const AuthProvider = ({ children }) => {
   }, [fetchUserData]);
 
   const login = (token, userData) => {
+    if (!token || !userData?.id) {
+      throw new Error('Invalid login response');
+    }
     localStorage.setItem('token', token);
     localStorage.setItem('id', userData.id);
     // Normalize role to lowercase to prevent case sensitivity issues

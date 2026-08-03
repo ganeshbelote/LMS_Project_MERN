@@ -66,9 +66,9 @@ const Profile = () => {
 
   const fetchStats = async () => {
     try {
-      const coursesRes = await api.get('/courses/')
-      if (coursesRes.data.ok) {
-        setStats(prev => ({ ...prev, totalCourses: coursesRes.data.data.length }))
+      const res = await api.get('/analytics/stats')
+      if (res.data.ok) {
+        setStats(res.data.data)
       }
     } catch {
       // silently fail
@@ -240,26 +240,42 @@ const Profile = () => {
 
               {/* Admin Stats */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-                <div className="bg-blue-50 rounded-xl p-4 text-center">
+                <button
+                  onClick={() => navigate('/admin-analytics')}
+                  className="bg-blue-50 rounded-xl p-4 text-center hover:bg-blue-100 hover:shadow-md transition-all cursor-pointer"
+                  title="View course analytics"
+                >
                   <BookOpen className="w-6 h-6 text-blue-600 mx-auto mb-1" />
                   <p className="text-2xl font-bold text-gray-800">{stats.totalCourses}</p>
                   <p className="text-xs text-gray-500">Total Courses</p>
-                </div>
-                <div className="bg-green-50 rounded-xl p-4 text-center">
+                </button>
+                <button
+                  onClick={() => navigate('/admin-analytics')}
+                  className="bg-green-50 rounded-xl p-4 text-center hover:bg-green-100 hover:shadow-md transition-all cursor-pointer"
+                  title="View user analytics"
+                >
                   <Users className="w-6 h-6 text-green-600 mx-auto mb-1" />
                   <p className="text-2xl font-bold text-gray-800">{stats.totalUsers}</p>
                   <p className="text-xs text-gray-500">Total Users</p>
-                </div>
-                <div className="bg-purple-50 rounded-xl p-4 text-center">
+                </button>
+                <button
+                  onClick={() => navigate('/admin-analytics')}
+                  className="bg-purple-50 rounded-xl p-4 text-center hover:bg-purple-100 hover:shadow-md transition-all cursor-pointer"
+                  title="View enrollment analytics"
+                >
                   <TrendingUp className="w-6 h-6 text-purple-600 mx-auto mb-1" />
                   <p className="text-2xl font-bold text-gray-800">{stats.totalEnrollments}</p>
                   <p className="text-xs text-gray-500">Enrollments</p>
-                </div>
-                <div className="bg-orange-50 rounded-xl p-4 text-center">
+                </button>
+                <button
+                  onClick={() => navigate('/admin-analytics')}
+                  className="bg-orange-50 rounded-xl p-4 text-center hover:bg-orange-100 hover:shadow-md transition-all cursor-pointer"
+                  title="View revenue analytics"
+                >
                   <DollarSign className="w-6 h-6 text-orange-600 mx-auto mb-1" />
-                  <p className="text-2xl font-bold text-gray-800">₹{stats.revenue}</p>
+                  <p className="text-2xl font-bold text-gray-800">₹{(Number(stats.revenue) || 0).toLocaleString('en-IN')}</p>
                   <p className="text-xs text-gray-500">Revenue</p>
-                </div>
+                </button>
               </div>
 
               {/* Admin Quick Actions */}

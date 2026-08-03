@@ -32,7 +32,7 @@ const CourseDetail = () => {
               userId: user._id,
               courseId
             })
-            setIsEnrolled(enrollRes.data.isEnrolled)
+            setIsEnrolled(enrollRes.data.data?.isEnrolled ?? false)
           }
         } else {
           setError('Course not found')

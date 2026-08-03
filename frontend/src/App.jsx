@@ -5,6 +5,7 @@ import AddCourses from './pages/AddCourses.jsx'
 import EditCourse from './pages/EditCourse.jsx'
 import CourseDetail from './pages/CourseDetail.jsx'
 import Profile from './pages/Profile.jsx'
+import AdminAnalytics from './pages/AdminAnalytics.jsx'
 import NotFound from './pages/NotFound.jsx'
 import RegisterForm from './components/Auth/RegisterForm.jsx'
 import LoginForm from './components/Auth/LoginForm.jsx'
@@ -48,6 +49,7 @@ function App () {
         { index: true, element: <Dashboard /> },
         { path: 'enrolled-courses', element: <EnrolledCourses /> },
         { path: 'profile', element: <Profile /> },
+        { path: 'admin-analytics', element: <AdminRoute><AdminAnalytics /></AdminRoute> },
         { path: 'inbox', element: <Inbox /> },
         { path: 'task', element: <Task /> },
         { path: 'add-courses', element: <AddCourses /> },

@@ -1,144 +1,81 @@
 import User from '../models/user.model.js'
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
+import { success } from '../utils/response.js'
+import { ConflictError, NotFoundError, UnauthorizedError, DatabaseError } from '../errors/index.js'
 
 export const register = async (req, res) => {
-  try {
-    const { username, email, password } = req.body
+  const { username, email, password } = req.body
 
-    if (!username || !email || !password) {
-      return res.status(400).json({
-        ok: false,
-        message: 'All fields are required !'
-      })
-    }
-
-    const usernameExist = await User.findOne({ username })
-
-    if (usernameExist) {
-      return res.status(401).json({
-        ok: false,
-        message: 'User already Exist with this username !'
-      })
-    }
-
-    const emailExist = await User.findOne({ email })
-
-    if (emailExist) {
-      return res.status(401).json({
-        ok: false,
-        message: 'User already Exist with this email !'
-      })
-    }
-
-    if (password.length < 4) {
-      return res.status(400).json({
-        ok: false,
-        message: 'Password should contain minimum 4 characters !'
-      })
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10)
-
-    if (!hashedPassword) {
-      return res.status(500).json({
-        ok: false,
-        message: 'Internal Server Error ! Please Try again.'
-      })
-    }
-
-    const user = await User.create({
-      username,
-      email,
-      password: hashedPassword
-    })
-
-    if (!user) {
-      return res.status(500).json({
-        ok: false,
-        message: 'Database Error ! Please Try again.'
-      })
-    }
-
-    return res.status(200).json({
-      ok: true,
-      message: 'User created Successfully 🌸',
-      username
-    })
-  } catch (error) {
-    return res.status(500).json({
-      ok: false,
-      message: 'Internal Server Error ! Please Try again.'
-    })
+  const usernameExist = await User.findOne({ username })
+  if (usernameExist) {
+    throw new ConflictError('User already exists with this username!')
   }
+
+  const emailExist = await User.findOne({ email })
+  if (emailExist) {
+    throw new ConflictError('User already exists with this email!')
+  }
+
+  const hashedPassword = await bcrypt.hash(password, 10)
+  if (!hashedPassword) {
+    throw new DatabaseError('Internal Server Error! Please try again.')
+  }
+
+  const user = await User.create({
+    username,
+    email,
+    password: hashedPassword
+  })
+
+  if (!user) {
+    throw new DatabaseError('Database Error! Please try again.')
+  }
+
+  return success(res, {
+    statusCode: 200,
+    message: 'User created Successfully',
+    data: { username }
+  })
 }
 
 export const login = async (req, res) => {
-  try {
-    const { email, password } = req.body
+  const { email, password } = req.body
 
-    if (!email || !password) {
-      return res.status(400).json({
-        ok: false,
-        message: 'All fields are required !'
-      })
-    }
+  const user = await User.findOne({ email })
+  if (!user) {
+    throw new NotFoundError('User does not exist! Please register.')
+  }
 
-    const user = await User.findOne({ email })
+  const decodedPassword = await bcrypt.compare(password, user.password)
+  if (!decodedPassword) {
+    throw new UnauthorizedError('Password is incorrect! Please try again.')
+  }
 
-    if (!user) {
-      return res.status(401).json({
-        ok: false,
-        message: 'User not Exist ! Please Register.'
-      })
-    }
+  const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET_CODE, {
+    expiresIn: '24h'
+  })
 
-    const decodedPassword = await bcrypt.compare(password, user.password)
-
-    if (!decodedPassword) {
-      return res.status(401).json({
-        ok: false,
-        message: 'Password is Incorrect ! Please Try again.'
-      })
-    }
-
-    const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET_CODE, {
-      expiresIn: '24h'
-    })
-
-    return res.status(200).json({
-      ok: true,
-      message: 'Successfully Logged In.',
+  return success(res, {
+    statusCode: 200,
+    message: 'Successfully Logged In.',
+    data: {
       token,
       user: { id: user._id, username: user.username, role: user.role }
-    })
-  } catch (error) {
-    return res.status(500).json({
-      ok: false,
-      message: 'Internal Server Error ! Please Try again.'
-    })
-  }
+    }
+  })
 }
 
 export const getUserData = async (req, res) => {
-  try {
-    const userId = req.body.id
-    const user = await User.findById(userId)
-    if (!user) {
-      return res.status(500).json({
-        ok: false,
-        message: 'User Not Found !'
-      })
-    }
-    return res.status(200).json({
-      ok: true,
-      message: 'User data successfully retrieved !',
-      data : user
-    })
-  } catch (error) {
-    return res.status(500).json({
-      ok: false,
-      message: 'Failed to retrive user data !'
-    })
+  const userId = req.body.id
+  const user = await User.findById(userId)
+  if (!user) {
+    throw new NotFoundError('User not found!')
   }
+
+  return success(res, {
+    statusCode: 200,
+    message: 'User data successfully retrieved!',
+    data: user
+  })
 }

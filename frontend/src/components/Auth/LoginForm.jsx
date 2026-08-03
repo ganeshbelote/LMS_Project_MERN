@@ -25,8 +25,13 @@ const LoginForm = () => {
       const res = await api.post('/auth/login', formData)
       const data = res.data
       if (data.ok) {
-        login(data.token, data.user)
-        toast.success(`Welcome back, ${data.user.username}! 🎉`)
+        // New standardized response wraps token/user inside `data.data`
+        const { token, user } = data.data || {}
+        if (!token || !user) {
+          throw new Error('Invalid response from server')
+        }
+        login(token, user)
+        toast.success(`Welcome back, ${user.username}! 🎉`)
         navigate('/')
       } else {
         setError(data.message)

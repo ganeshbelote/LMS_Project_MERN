@@ -11,4 +11,4 @@ jobs:
     steps:
       - name: Ping Render App
         run: |
-          curl -s https://lms-project-mern-49ws.onrender.com > /dev/null
+          curl -s https://lms-web-by-ganesh.onrender.com/health > /dev/null

@@ -26,7 +26,7 @@ const LoginForm = () => {
       const data = res.data
       if (data.ok) {
         // New standardized response wraps token/user inside `data.data`
-        const { token, user } = data.data || {}
+        const { token, user } = data || {}
         if (!token || !user) {
           throw new Error('Invalid response from server')
         }

@@ -3,7 +3,12 @@ import User from '../models/user.model.js'
 import processAndUploadVideo from '../utils/cloudinary.js'
 import cloudinary from '../config/cloudinary.js'
 import { success } from '../utils/response.js'
-import { NotFoundError, ConflictError, ValidationError, DatabaseError } from '../errors/index.js'
+import {
+  NotFoundError,
+  ConflictError,
+  ValidationError,
+  DatabaseError
+} from '../errors/index.js'
 import logger from '../utils/logger.js'
 
 // ---------------------------------------------------------------------------
@@ -14,7 +19,9 @@ export const addCourse = async (req, res) => {
 
   if (!title || !description || !price) {
     throw new ValidationError('Title, description, and price are required!', {
-      title: !!title, description: !!description, price: !!price
+      title: !!title,
+      description: !!description,
+      price: !!price
     })
   }
 
@@ -29,7 +36,10 @@ export const addCourse = async (req, res) => {
       thumbnailUrl = thumbnailUpload.secure_url
     } catch (uploadErr) {
       logger.error({ error: uploadErr }, 'Thumbnail upload error')
-      throw new DatabaseError('Failed to upload thumbnail image!', uploadErr.message)
+      throw new DatabaseError(
+        'Failed to upload thumbnail image!',
+        uploadErr.message
+      )
     }
   } else {
     throw new ValidationError('Thumbnail image is required!')
@@ -39,7 +49,11 @@ export const addCourse = async (req, res) => {
 
   if (videoUrls) {
     const urlArr = Array.isArray(videoUrls) ? videoUrls : [videoUrls]
-    const titleArr = videoTitles ? (Array.isArray(videoTitles) ? videoTitles : [videoTitles]) : []
+    const titleArr = videoTitles
+      ? Array.isArray(videoTitles)
+        ? videoTitles
+        : [videoTitles]
+      : []
     videos = urlArr.map((url, index) => ({
       title: titleArr[index] || `Lecture ${index + 1}`,
       url,
@@ -48,11 +62,18 @@ export const addCourse = async (req, res) => {
   }
 
   if (req.files && req.files.videos && req.files.videos.length > 0) {
-    const videoTitlesArr = videoTitles ? (Array.isArray(videoTitles) ? videoTitles : [videoTitles]) : []
+    const videoTitlesArr = videoTitles
+      ? Array.isArray(videoTitles)
+        ? videoTitles
+        : [videoTitles]
+      : []
     const uploadedVideos = await Promise.all(
       req.files.videos.map(async (file, index) => {
         try {
-          const uploadResult = await processAndUploadVideo(file.path, 'courses/videos')
+          const uploadResult = await processAndUploadVideo(
+            file.path,
+            'courses/videos'
+          )
           return {
             title: videoTitlesArr[index] || 'Untitled',
             url: uploadResult.url,
@@ -60,7 +81,11 @@ export const addCourse = async (req, res) => {
           }
         } catch (videoErr) {
           logger.error({ error: videoErr, index }, 'Video upload error')
-          return { title: videoTitlesArr[index] || 'Untitled', url: '', public_id: 'upload_failed' }
+          return {
+            title: videoTitlesArr[index] || 'Untitled',
+            url: '',
+            public_id: 'upload_failed'
+          }
         }
       })
     )
@@ -80,7 +105,10 @@ export const addCourse = async (req, res) => {
   })
 
   await newCourse.save()
-  logger.info({ courseId: newCourse._id, title: newCourse.title }, 'Course created')
+  logger.info(
+    { courseId: newCourse._id, title: newCourse.title },
+    'Course created'
+  )
 
   return success(res, {
     statusCode: 200,
@@ -125,13 +153,20 @@ export const updateCourse = async (req, res) => {
       existingCourse.thumbnail = thumbnailUpload.secure_url
     } catch (uploadErr) {
       logger.error({ error: uploadErr }, 'Thumbnail upload error')
-      throw new DatabaseError('Failed to upload thumbnail image!', uploadErr.message)
+      throw new DatabaseError(
+        'Failed to upload thumbnail image!',
+        uploadErr.message
+      )
     }
   }
 
   if (videoUrls) {
     const urlArr = Array.isArray(videoUrls) ? videoUrls : [videoUrls]
-    const titleArr = videoTitles ? (Array.isArray(videoTitles) ? videoTitles : [videoTitles]) : []
+    const titleArr = videoTitles
+      ? Array.isArray(videoTitles)
+        ? videoTitles
+        : [videoTitles]
+      : []
     existingCourse.videos = urlArr.map((url, index) => ({
       title: titleArr[index] || `Lecture ${index + 1}`,
       url,
@@ -140,7 +175,10 @@ export const updateCourse = async (req, res) => {
   }
 
   await existingCourse.save()
-  logger.info({ courseId: existingCourse._id, title: existingCourse.title }, 'Course updated')
+  logger.info(
+    { courseId: existingCourse._id, title: existingCourse.title },
+    'Course updated'
+  )
 
   return success(res, {
     statusCode: 200,
@@ -257,7 +295,9 @@ export const cancelEnroll = async (req, res) => {
     throw new ConflictError("You aren't enrolled in this course!")
   }
 
-  user.enrolledCourses = user.enrolledCourses.filter(id => id.toString() !== courseId)
+  user.enrolledCourses = user.enrolledCourses.filter(
+    id => id.toString() !== courseId
+  )
   await user.save()
 
   return success(res, {
@@ -282,7 +322,9 @@ export const checkEnrollment = async (req, res) => {
     throw new NotFoundError('Course not found!')
   }
 
-  const isEnrolled = user.enrolledCourses.includes(courseId)
+  // const isEnrolled = user.enrolledCourses.includes(courseId)
+
+  const isEnrolled = user.enrolledCourses.some(id => id.toString() === courseId)
 
   return success(res, {
     statusCode: 200,

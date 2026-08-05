@@ -18,6 +18,8 @@
     "zod": "^4.4.3"
   },
   "scripts": {
-    "dev": "node index.js"
+    "dev": "node index.js",
+    "start": "node index.js",
+    "build": "echo \"No build step required\""
   }
 }

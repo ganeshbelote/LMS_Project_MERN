@@ -42,6 +42,17 @@ app.use('/api/v1/notifications', limiter, notification)
 app.use('/api/v1/tasks', limiter, task)
 app.use('/api/v1/analytics', limiter, analytics)
 
+// health check
+app.get('/health', (req, res) => {
+  res.status(200).json({
+    status: 'UP',
+    message: 'Server is running',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    environment: process.env.NODE_ENV || 'development'
+  })
+})
+
 // --- 404 for unknown routes --------------------------------------------
 app.use(notFoundHandler)
 
@@ -51,7 +62,7 @@ app.use(errorHandler)
 // --- Process-level error handling --------------------------------------
 let isShuttingDown = false
 
-function shutdown(source) {
+function shutdown (source) {
   if (isShuttingDown) return
   isShuttingDown = true
   logger.warn({ source }, 'Shutting down server gracefully...')
@@ -65,7 +76,7 @@ process.on('unhandledRejection', (reason, promise) => {
   shutdown('unhandledRejection')
 })
 
-process.on('uncaughtException', (err) => {
+process.on('uncaughtException', err => {
   logger.fatal({ error: err, stack: err.stack }, 'Uncaught Exception')
   shutdown('uncaughtException')
 })

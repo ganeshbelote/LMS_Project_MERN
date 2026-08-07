@@ -18,8 +18,8 @@ const getEnv = (key, aliases = []) => {
 
 export const validateEnv = () => {
   const missing = []
-  if (!getEnv('MONGODB_URI', ['MONGODB_URI'])) missing.push('MONGODB_URI')
-  if (!getEnv('JWT_SECRET', ['JWT_SECRET'])) missing.push('JWT_SECRET')
+  if (!getEnv('MONGODB_URI', ['MONGO_URL'])) missing.push('MONGODB_URI (or MONGO_URL)')
+  if (!getEnv('JWT_SECRET', ['JWT_SECRET_CODE'])) missing.push('JWT_SECRET (or JWT_SECRET_CODE)')
 
   if (missing.length > 0) {
     logger.fatal(
@@ -59,12 +59,12 @@ export const env = (key, aliases = [], fallback = '') =>
  * Get the JWT secret (supports JWT_SECRET and legacy JWT_SECRET_CODE).
  */
 export const jwtSecret = () =>
-  getEnv('JWT_SECRET', ['JWT_SECRET']) || ''
+  getEnv('JWT_SECRET', ['JWT_SECRET_CODE']) || ''
 
 /**
  * Get the MongoDB URI (supports MONGODB_URI and legacy MONGO_URL).
  */
 export const mongoUri = () =>
-  getEnv('MONGODB_URI', ['MONGODB_URI']) || ''
+  getEnv('MONGODB_URI', ['MONGO_URL']) || ''
 
 export default validateEnv

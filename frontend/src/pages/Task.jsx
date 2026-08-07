@@ -5,17 +5,6 @@ import api from "../utils/api"
 import { CheckSquare, Plus, Clock, Calendar, Trash2, X, Loader, AlertCircle } from 'lucide-react'
 import { toast } from 'react-toastify'
 
-const getUserId = () => {
-  const storedUser = localStorage.getItem('user')
-  if (storedUser) {
-    try {
-      const parsed = JSON.parse(storedUser)
-      return parsed._id || parsed.id || localStorage.getItem('id')
-    } catch {}
-  }
-  return localStorage.getItem('id')
-}
-
 const Task = () => {
   const { user } = useAuth()
   const [tasks, setTasks] = useState([])
@@ -31,7 +20,7 @@ const Task = () => {
   })
   const [submitting, setSubmitting] = useState(false)
 
-  const userId = user?._id || user?.id || getUserId()
+  const userId = user?.id || user?._id || localStorage.getItem('id')
 
   const fetchTasks = async () => {
     setError(null)
@@ -41,17 +30,14 @@ const Task = () => {
       return
     }
     try {
-      console.log('Fetching tasks for user:', userId)
       const res = await api.post('/tasks/', { userId })
-      console.log('Tasks response:', res.data)
       if (res.data.ok) {
         setTasks(res.data.data)
       } else {
         setError(res.data.message || 'Failed to fetch tasks')
       }
     } catch (err) {
-      console.error('Fetch tasks error:', err.response || err.message)
-      const msg = err.response?.data?.message || `Server error (${err.response?.status || 'connection'}). Is the backend running on port 8000?`
+      const msg = err.response?.data?.message || 'Failed to load tasks. Please try again.'
       setError(msg)
       toast.error(msg)
     } finally {
@@ -102,12 +88,10 @@ const Task = () => {
     }
     setSubmitting(true)
     try {
-      console.log('Creating task for user:', userId)
       const res = await api.post('/tasks/create', {
         userId,
         ...newTask
       })
-      console.log('Create response:', res.data)
       if (res.data.ok) {
         setTasks(prev => [res.data.data, ...prev])
         setShowAddModal(false)

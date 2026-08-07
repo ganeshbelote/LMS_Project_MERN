@@ -2,7 +2,23 @@ import User from '../models/user.model.js'
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import { success } from '../utils/response.js'
+import { jwtSecret } from '../utils/env.js'
 import { ConflictError, NotFoundError, UnauthorizedError, DatabaseError } from '../errors/index.js'
+
+/**
+ * Normalize a Mongoose user document into a consistent API shape.
+ * Both `id` and `_id` are included so the frontend can use either
+ * without breaking enrollment checks or profile rendering.
+ */
+const normalizeUser = (user) => ({
+  id: user._id.toString(),
+  _id: user._id.toString(),
+  username: user.username,
+  email: user.email,
+  role: user.role,
+  enrolledCourses: user.enrolledCourses,
+  createdAt: user.createdAt
+})
 
 export const register = async (req, res) => {
   const { username, email, password } = req.body
@@ -35,7 +51,7 @@ export const register = async (req, res) => {
   return success(res, {
     statusCode: 200,
     message: 'User created Successfully',
-    data: { username }
+    data: { username, email }
   })
 }
 
@@ -52,7 +68,7 @@ export const login = async (req, res) => {
     throw new UnauthorizedError('Password is incorrect! Please try again.')
   }
 
-  const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET_CODE, {
+  const token = jwt.sign({ id: user._id, role: user.role }, jwtSecret(), {
     expiresIn: '24h'
   })
 
@@ -61,13 +77,18 @@ export const login = async (req, res) => {
     message: 'Successfully Logged In.',
     data: {
       token,
-      user: { id: user._id, username: user.username, role: user.role }
+      user: normalizeUser(user)
     }
   })
 }
 
 export const getUserData = async (req, res) => {
-  const userId = req.body.id
+  const userId = req.body.id || req.body.userId || req.user?.id
+
+  if (!userId) {
+    throw new NotFoundError('User ID is required!')
+  }
+
   const user = await User.findById(userId)
   if (!user) {
     throw new NotFoundError('User not found!')
@@ -76,6 +97,6 @@ export const getUserData = async (req, res) => {
   return success(res, {
     statusCode: 200,
     message: 'User data successfully retrieved!',
-    data: user
+    data: normalizeUser(user)
   })
 }

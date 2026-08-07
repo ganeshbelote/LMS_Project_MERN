@@ -1,15 +1,19 @@
 import jwt from 'jsonwebtoken'
+import { jwtSecret } from '../utils/env.js'
 import { UnauthorizedError, ForbiddenError } from '../errors/index.js'
 
 export const ensureAuth = (req, res, next) => {
-  const token = req.headers.authorization?.split(' ')[1] || req.body.token
+  const authHeader = req.headers.authorization
+  const token = authHeader?.startsWith('Bearer ')
+    ? authHeader.split(' ')[1]
+    : req.body.token
 
   if (!token) {
     return next(new UnauthorizedError('Authentication required. Please login.'))
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET_CODE)
+    const decoded = jwt.verify(token, jwtSecret())
     req.user = decoded
     next()
   } catch (error) {

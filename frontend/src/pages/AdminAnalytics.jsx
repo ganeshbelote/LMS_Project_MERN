@@ -37,7 +37,7 @@ const AdminAnalytics = () => {
         const res = await api.get('/analytics/stats')
         if (!cancelled && res.data.ok) setStats(res.data.data)
       } catch (err) {
-        if (!cancelled) console.error('Failed to fetch stats', err)
+        if (!cancelled) setError(err.response?.data?.message || 'Failed to load stats')
       }
     })()
     return () => { cancelled = true }

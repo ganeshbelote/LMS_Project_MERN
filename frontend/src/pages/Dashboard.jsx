@@ -21,7 +21,7 @@ const Dashboard = () => {
       try {
         const [coursesRes, enrollRes] = await Promise.all([
           api.get('/courses/'),
-          api.post('/courses/getAllEnrollments', { userId: user?._id || localStorage.getItem('id') })
+          api.post('/courses/getAllEnrollments', { userId: user?.id || user?._id || localStorage.getItem('id') })
         ])
         if (coursesRes.data.ok) {
           setCourses(coursesRes.data.data)

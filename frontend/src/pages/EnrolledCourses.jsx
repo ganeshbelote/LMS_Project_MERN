@@ -21,7 +21,7 @@ const EnrolledCourses = () => {
   const fetchEnrollments = async () => {
     try {
       const res = await api.post('/courses/getAllEnrollments', {
-        userId: user?._id || localStorage.getItem('id')
+        userId: user?.id || user?._id || localStorage.getItem('id')
       })
       if (res.data.ok) {
         setEnrollments(res.data.data)

@@ -5,6 +5,7 @@ import rateLimit from 'express-rate-limit'
 
 import { connectDB } from './database/db.js'
 import logger from './utils/logger.js'
+import { validateEnv, env } from './utils/env.js'
 import { requestIdMiddleware } from './middlewares/requestId.js'
 import { requestLogger } from './middlewares/requestLogger.js'
 import { errorHandler, notFoundHandler } from './middlewares/errorHandler.js'
@@ -17,23 +18,44 @@ import analytics from './routes/analytics.route.js'
 
 dotenv.config()
 
+// Fail fast if required env vars are missing
+validateEnv()
+
 const app = express()
-app.use(express.json())
-app.use(cors())
+app.use(express.json({ limit: '10mb' }))
+
+// --- CORS ----------------------------------------------------------------
+const allowedOrigins = (process.env.CORS_ORIGINS || env('CLIENT_URL', [], 'http://localhost:5173'))
+  .split(',')
+  .map(origin => origin.trim())
+  .filter(Boolean)
+
+app.use(cors({
+  origin(origin, callback) {
+    // Allow requests with no origin (curl, Postman, same-origin, health checks)
+    if (!origin || allowedOrigins.includes('*') || allowedOrigins.includes(origin)) {
+      return callback(null, true)
+    }
+    return callback(new Error(`CORS: Origin ${origin} not allowed`))
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-Id']
+}))
+
 app.use(express.static('public'))
 
 // --- Request ID + structured request logging ---------------------------
 app.use(requestIdMiddleware)
 app.use(requestLogger)
 
-const PORT = process.env.PORT || 3000
-
-connectDB()
-
+// --- Rate limiting -------------------------------------------------------
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
-  message: 'Too many requests, slow down.'
+  message: 'Too many requests, slow down.',
+  standardHeaders: true,
+  legacyHeaders: false
 })
 
 app.use('/api/v1/auth', limiter, auth)
@@ -45,6 +67,7 @@ app.use('/api/v1/analytics', limiter, analytics)
 // health check
 app.get('/health', (req, res) => {
   res.status(200).json({
+    ok: true,
     status: 'UP',
     message: 'Server is running',
     timestamp: new Date().toISOString(),
@@ -84,8 +107,12 @@ process.on('uncaughtException', err => {
 process.on('SIGINT', () => shutdown('SIGINT'))
 process.on('SIGTERM', () => shutdown('SIGTERM'))
 
-const server = app.listen(PORT, () => {
-  console.log(`Server is started on ${PORT}`)
+const PORT = process.env.PORT || 8000
+
+connectDB().then(() => {
+  const server = app.listen(PORT, () => {
+    logger.info(`Server started on port ${PORT} (${process.env.NODE_ENV || 'development'})`)
+  })
 })
 
 export default app

@@ -21,29 +21,35 @@ const CourseDetail = () => {
   const [watchedVideos, setWatchedVideos] = useState([])
 
   useEffect(() => {
+    let cancelled = false
     const fetchCourse = async () => {
       try {
         const res = await api.post('/courses/courseDetails', { id: courseId })
+        if (cancelled) return
         if (res.data.ok) {
           setCourse(res.data.data)
-          // Check enrollment
-          if (user?._id) {
+          // Check enrollment — use both id and _id to handle any user shape
+          const userId = user?.id || user?._id || localStorage.getItem('id')
+          if (userId) {
             const enrollRes = await api.post('/courses/checkEnrollment', {
-              userId: user._id,
+              userId,
               courseId
             })
-            setIsEnrolled(enrollRes.data.data?.isEnrolled ?? false)
+            if (!cancelled) {
+              setIsEnrolled(enrollRes.data.data?.isEnrolled ?? false)
+            }
           }
         } else {
           setError('Course not found')
         }
       } catch (err) {
-        setError('Failed to load course details')
+        if (!cancelled) setError('Failed to load course details')
       } finally {
-        setLoading(false)
+        if (!cancelled) setLoading(false)
       }
     }
     fetchCourse()
+    return () => { cancelled = true }
   }, [courseId, user])
 
   // Auto-select first video when enrolled
@@ -60,8 +66,8 @@ const CourseDetail = () => {
     }
     setEnrolling(true)
     try {
-      // Use _id, id, or localStorage fallback to handle different user object formats
-      const userId = user?._id || user?.id || localStorage.getItem('id')
+      // Use id, _id, or localStorage fallback to handle different user object formats
+      const userId = user?.id || user?._id || localStorage.getItem('id')
       if (!userId) {
         toast.error('User not found. Please login again.')
         setEnrolling(false)
@@ -78,7 +84,6 @@ const CourseDetail = () => {
         toast.error(res.data.message || 'Enrollment failed')
       }
     } catch (err) {
-      console.error('❌ Enrollment error:', err)
       toast.error(err.response?.data?.message || 'Enrollment failed. Please try again.')
     } finally {
       setEnrolling(false)

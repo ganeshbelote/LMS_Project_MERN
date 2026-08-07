@@ -23,10 +23,11 @@ const LoginForm = () => {
     setError(null)
     try {
       const res = await api.post('/auth/login', formData)
-      const data = res.data
-      if (data.ok) {
-        // New standardized response wraps token/user inside `data.data`
-        const { token, user } = data || {}
+      const body = res.data
+
+      if (body.ok) {
+        // Standardized response: { ok: true, message, data: { token, user } }
+        const { token, user } = body.data || {}
         if (!token || !user) {
           throw new Error('Invalid response from server')
         }
@@ -34,11 +35,12 @@ const LoginForm = () => {
         toast.success(`Welcome back, ${user.username}! 🎉`)
         navigate('/')
       } else {
-        setError(data.message)
-        toast.error(data.message)
+        const msg = body.message || 'Login failed. Please try again.'
+        setError(msg)
+        toast.error(msg)
       }
     } catch (err) {
-      const msg = err.response?.data?.message || 'Login failed. Please try again.'
+      const msg = err.response?.data?.message || err.message || 'Login failed. Please try again.'
       setError(msg)
       toast.error(msg)
     } finally {

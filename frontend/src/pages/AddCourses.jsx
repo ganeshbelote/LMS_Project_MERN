@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
-import baseUrl from '../utils/baseUrl'
+import api from '../utils/api'
 import { toast } from 'react-toastify'
 import { Plus, Upload, Image, Trash2, Link as LinkIcon, AlertCircle, Info, CheckCircle, XCircle } from 'lucide-react'
 
@@ -122,12 +122,10 @@ const AddCourses = () => {
     }, 500)
 
     try {
-      const token = localStorage.getItem('token')
       const data = new FormData()
       data.append('title', formData.title.trim())
       data.append('description', formData.description.trim())
       data.append('price', formData.price)
-      data.append('token', token)
 
       if (formData.thumbnail) {
         data.append('thumbnail', formData.thumbnail)
@@ -140,28 +138,16 @@ const AddCourses = () => {
         data.append('videoTitles', lecture.videoTitle.trim())
       })
 
-      console.log('📤 Adding course with:', {
-        title: formData.title,
-        description: formData.description,
-        price: formData.price,
-        lecturesCount: validLectures.length,
-        hasThumbnail: !!formData.thumbnail
-      })
-
-      const response = await fetch(`${baseUrl}/courses/`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`
-        },
-        body: data
+      const response = await api.post('/courses/', data, {
+        headers: { 'Content-Type': 'multipart/form-data' }
       })
 
       clearInterval(progressInterval)
       setUploadProgress(90)
 
-      const result = await response.json()
+      const result = response.data
 
-      if (response.ok && result.ok) {
+      if (result.ok) {
         setUploadProgress(100)
         toast.success('✅ Course added successfully!')
         // Clean up preview URL
@@ -181,14 +167,12 @@ const AddCourses = () => {
         setFormKey(prev => prev + 1)
         setTimeout(() => setUploadProgress(0), 2000)
       } else {
-        console.error('❌ Server error response:', result)
         toast.error(result.message || 'Failed to add course')
         setUploadProgress(0)
       }
     } catch (err) {
       clearInterval(progressInterval)
-      console.error('❌ Upload error:', err)
-      toast.error('Network error! Please check your connection and try again.')
+      toast.error(err.response?.data?.message || 'Network error! Please check your connection and try again.')
       setUploadProgress(0)
     } finally {
       setLoading(false)

@@ -43,7 +43,7 @@ const Profile = () => {
   const fetchEnrolledCourses = async () => {
     try {
       const res = await api.post('/courses/getAllEnrollments', {
-        userId: user?._id || localStorage.getItem('id')
+        userId: user?.id || user?._id || localStorage.getItem('id')
       })
       if (res.data.ok) {
         setEnrolledCourses(res.data.data)

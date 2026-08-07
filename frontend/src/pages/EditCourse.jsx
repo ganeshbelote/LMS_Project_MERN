@@ -3,7 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
 import api from '../utils/api'
-import baseUrl from '../utils/baseUrl'
 import { toast } from 'react-toastify'
 import { Plus, Upload, Image, Trash2, Link as LinkIcon, AlertCircle, Info, CheckCircle, ArrowLeft, Loader } from 'lucide-react'
 
@@ -139,13 +138,11 @@ const EditCourse = () => {
 
     setSaving(true)
     try {
-      const token = localStorage.getItem('token')
       const data = new FormData()
       data.append('id', courseId)
       data.append('title', formData.title.trim())
       data.append('description', formData.description.trim())
       data.append('price', formData.price)
-      data.append('token', token)
 
       if (formData.thumbnail) {
         data.append('thumbnail', formData.thumbnail)
@@ -157,28 +154,20 @@ const EditCourse = () => {
         data.append('videoTitles', lecture.videoTitle.trim())
       })
 
-      console.log('📤 Updating course:', courseId)
-
-      const response = await fetch(`${baseUrl}/courses/updateCourse/${courseId}`, {
-        method: 'PUT',
-        headers: {
-          Authorization: `Bearer ${token}`
-        },
-        body: data
+      const response = await api.put(`/courses/updateCourse/${courseId}`, data, {
+        headers: { 'Content-Type': 'multipart/form-data' }
       })
 
-      const result = await response.json()
+      const result = response.data
 
-      if (response.ok && result.ok) {
+      if (result.ok) {
         toast.success('✅ Course updated successfully!')
         navigate(`/course/${courseId}`)
       } else {
-        console.error('❌ Update error:', result)
         toast.error(result.message || 'Failed to update course')
       }
     } catch (err) {
-      console.error('❌ Update error:', err)
-      toast.error('Network error! Please try again.')
+      toast.error(err.response?.data?.message || 'Network error! Please try again.')
     } finally {
       setSaving(false)
     }

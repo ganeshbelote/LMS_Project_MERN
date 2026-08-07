@@ -174,8 +174,8 @@ const VideoPlayer = ({ videoUrl, videoTitle, onEnded }) => {
     if (!containerRef.current) return
     
     if (!document.fullscreenElement) {
-      containerRef.current.requestFullscreen().catch(err => {
-        console.error('Fullscreen error:', err)
+      containerRef.current.requestFullscreen().catch(() => {
+        // Fullscreen request failed (e.g. browser restrictions) — ignore silently
       })
       setIsFullscreen(true)
     } else {

@@ -14,7 +14,7 @@ const Inbox = () => {
   const fetchNotifications = async () => {
     try {
       const res = await api.post('/notifications/', {
-        userId: user?._id || localStorage.getItem('id')
+        userId: user?.id || user?._id || localStorage.getItem('id')
       })
       if (res.data.ok) {
         setNotifications(res.data.data)
@@ -29,7 +29,7 @@ const Inbox = () => {
   }
 
   useEffect(() => {
-    if (user?._id || localStorage.getItem('id')) {
+    if (user?.id || user?._id || localStorage.getItem('id')) {
       fetchNotifications()
     } else {
       setLoading(false)
@@ -51,7 +51,7 @@ const Inbox = () => {
   const handleMarkAllAsRead = async () => {
     try {
       await api.post('/notifications/markAllRead', {
-        userId: user?._id || localStorage.getItem('id')
+        userId: user?.id || user?._id || localStorage.getItem('id')
       })
       setNotifications(prev => prev.map(n => ({ ...n, isRead: true })))
       setUnreadCount(0)

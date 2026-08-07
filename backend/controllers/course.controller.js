@@ -1,3 +1,4 @@
+import mongoose from 'mongoose'
 import Course from '../models/course.model.js'
 import User from '../models/user.model.js'
 import processAndUploadVideo from '../utils/cloudinary.js'
@@ -10,6 +11,16 @@ import {
   DatabaseError
 } from '../errors/index.js'
 import logger from '../utils/logger.js'
+
+/**
+ * Check if a user is enrolled in a course using safe string comparison.
+ * Handles the case where `enrolledCourses` contains ObjectIds and
+ * `courseId` is a plain string — this always works.
+ */
+const isEnrolled = (user, courseId) => {
+  const target = String(courseId)
+  return user.enrolledCourses.some(id => String(id) === target)
+}
 
 // ---------------------------------------------------------------------------
 // addCourse
@@ -248,7 +259,15 @@ export const getCourseDetail = async (req, res) => {
 // enrollCourse
 // ---------------------------------------------------------------------------
 export const enrollCourse = async (req, res) => {
-  const { userId, courseId } = req.body
+  const userId = req.body.userId || req.user?.id
+  const courseId = req.body.courseId
+
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    throw new ValidationError('Invalid user ID format!')
+  }
+  if (!mongoose.Types.ObjectId.isValid(courseId)) {
+    throw new ValidationError('Invalid course ID format!')
+  }
 
   const user = await User.findById(userId)
   if (!user) {
@@ -260,7 +279,7 @@ export const enrollCourse = async (req, res) => {
     throw new NotFoundError('Course not found!')
   }
 
-  if (user.enrolledCourses.includes(courseId)) {
+  if (isEnrolled(user, courseId)) {
     throw new ConflictError('You are already enrolled in this course!')
   }
 
@@ -271,7 +290,8 @@ export const enrollCourse = async (req, res) => {
 
   return success(res, {
     statusCode: 200,
-    message: 'Successfully enrolled in course!'
+    message: 'Successfully enrolled in course!',
+    data: { isEnrolled: true }
   })
 }
 
@@ -279,7 +299,15 @@ export const enrollCourse = async (req, res) => {
 // cancelEnroll
 // ---------------------------------------------------------------------------
 export const cancelEnroll = async (req, res) => {
-  const { userId, courseId } = req.body
+  const userId = req.body.userId || req.user?.id
+  const courseId = req.body.courseId
+
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    throw new ValidationError('Invalid user ID format!')
+  }
+  if (!mongoose.Types.ObjectId.isValid(courseId)) {
+    throw new ValidationError('Invalid course ID format!')
+  }
 
   const user = await User.findById(userId)
   if (!user) {
@@ -291,18 +319,19 @@ export const cancelEnroll = async (req, res) => {
     throw new NotFoundError('Course not found!')
   }
 
-  if (!user.enrolledCourses.includes(courseId)) {
+  if (!isEnrolled(user, courseId)) {
     throw new ConflictError("You aren't enrolled in this course!")
   }
 
   user.enrolledCourses = user.enrolledCourses.filter(
-    id => id.toString() !== courseId
+    id => String(id) !== String(courseId)
   )
   await user.save()
 
   return success(res, {
     statusCode: 200,
-    message: 'Course enrollment cancelled successfully!'
+    message: 'Course enrollment cancelled successfully!',
+    data: { isEnrolled: false }
   })
 }
 
@@ -310,7 +339,15 @@ export const cancelEnroll = async (req, res) => {
 // checkEnrollment
 // ---------------------------------------------------------------------------
 export const checkEnrollment = async (req, res) => {
-  const { userId, courseId } = req.body
+  const userId = req.body.userId || req.user?.id
+  const courseId = req.body.courseId
+
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    throw new ValidationError('Invalid user ID format!')
+  }
+  if (!mongoose.Types.ObjectId.isValid(courseId)) {
+    throw new ValidationError('Invalid course ID format!')
+  }
 
   const user = await User.findById(userId)
   if (!user) {
@@ -322,14 +359,12 @@ export const checkEnrollment = async (req, res) => {
     throw new NotFoundError('Course not found!')
   }
 
-  // const isEnrolled = user.enrolledCourses.includes(courseId)
-
-  const isEnrolled = user.enrolledCourses.some(id => id.toString() === courseId)
+  const isUserEnrolled = isEnrolled(user, courseId)
 
   return success(res, {
     statusCode: 200,
-    message: isEnrolled ? 'User is enrolled' : 'User is not enrolled',
-    data: { isEnrolled }
+    message: isUserEnrolled ? 'User is enrolled' : 'User is not enrolled',
+    data: { isEnrolled: isUserEnrolled }
   })
 }
 
@@ -337,7 +372,11 @@ export const checkEnrollment = async (req, res) => {
 // getAllEnrollments
 // ---------------------------------------------------------------------------
 export const getAllEnrollments = async (req, res) => {
-  const { userId } = req.body
+  const userId = req.body.userId || req.user?.id
+
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    throw new ValidationError('Invalid user ID format!')
+  }
 
   const user = await User.findById(userId).populate('enrolledCourses')
   if (!user) {

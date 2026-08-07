@@ -3,6 +3,22 @@ import api from '../utils/api';
 
 const AuthContext = createContext(null);
 
+/**
+ * Normalize user object shape so both `id` and `_id` are always present.
+ * This prevents enrollment checks from failing due to format differences.
+ */
+const normalizeUser = (userData) => {
+  if (!userData) return null;
+  const id = userData.id || userData._id || userData.userId || null;
+  if (!id) return null;
+  return {
+    ...userData,
+    id,
+    _id: id,
+    role: (userData.role || 'user').toLowerCase()
+  };
+};
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -18,7 +34,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const res = await api.post('/auth/', { id });
       if (res.data.ok) {
-        setUser(res.data.data);
+        setUser(normalizeUser(res.data.data));
       } else {
         logout();
       }
@@ -34,15 +50,17 @@ export const AuthProvider = ({ children }) => {
   }, [fetchUserData]);
 
   const login = (token, userData) => {
-    if (!token || !userData?.id) {
+    if (!token || !userData) {
       throw new Error('Invalid login response');
     }
+    const normalized = normalizeUser(userData);
+    if (!normalized?.id) {
+      throw new Error('Invalid login response: missing user id');
+    }
     localStorage.setItem('token', token);
-    localStorage.setItem('id', userData.id);
-    // Normalize role to lowercase to prevent case sensitivity issues
-    const normalizedRole = userData.role?.toLowerCase() || 'user';
-    localStorage.setItem('role', normalizedRole);
-    setUser({ ...userData, role: normalizedRole });
+    localStorage.setItem('id', normalized.id);
+    localStorage.setItem('role', normalized.role);
+    setUser(normalized);
   };
 
   const logout = () => {
@@ -51,7 +69,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const isAuthenticated = !!localStorage.getItem('token');
-  const role = localStorage.getItem('role');
+  const role = localStorage.getItem('role') || '';
 
   return (
     <AuthContext.Provider

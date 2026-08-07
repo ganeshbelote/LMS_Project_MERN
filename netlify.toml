@@ -1,0 +1,42 @@
+# Netlify configuration for LMS project (monorepo root)
+# This file makes deployment fully self-contained and version-controlled,
+# removing dependency on dashboard settings.
+
+[build]
+  base = "frontend"
+  command = "npm run build"
+  publish = "dist"
+
+# Force Node.js version for consistent builds across local and Netlify
+[build.environment]
+  NODE_VERSION = "20"
+
+# SPA redirect - only for routes, not for existing files
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Force correct MIME types for JavaScript modules
+# Netlify sometimes serves .js as application/octet-stream when the catch-all
+# redirect interferes with asset requests
+[[headers]]
+  for = "/assets/*.js"
+  [headers.values]
+    Content-Type = "application/javascript; charset=UTF-8"
+    Cache-Control = "public, max-age=31536000, immutable"
+    X-Content-Type-Options = "nosniff"
+
+[[headers]]
+  for = "/assets/*.css"
+  [headers.values]
+    Content-Type = "text/css; charset=UTF-8"
+    Cache-Control = "public, max-age=31536000, immutable"
+    X-Content-Type-Options = "nosniff"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "DENY"
+    Referrer-Policy = "strict-origin-when-cross-origin"
